@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/scuroworks/qisbot.svg?token=24qz67tadxUHqtNZeoJu&branch=develop)](https://travis-ci.com/scuroworks/qisbot)
+
 # qisbot
 Schnelles und einfaches Auslesen des Notenspiegels von QIS Systemen.
 
