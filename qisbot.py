@@ -20,6 +20,7 @@ import logging
 import requests
 from lxml import html
 from os import environ
+from lxml.etree import XPathEvalError
 
 
 # User credentials
@@ -101,16 +102,16 @@ def fetch_source(url, session=None):
     if url is None:
         logging.warning('Cannot fetch page source: Invalid url')
         return None
-    logging.debug('Fetching source from ' + url)
+    logging.debug('Fetching source from "{0}"'.format(url))
     try:
         response = session.get(url) if session is not None else requests.get(url)
         response.raise_for_status()
-    except (ConnectionError, requests.HTTPError) as err:
-        logging.error('Fetching source from ' + url + ' failed')
+    except requests.RequestException as err:
+        logging.error('Fetching source from "{0}" failed: {1}'.format(url, err))
         return None
     else:
         if response.status_code != requests.codes.ok:
-            logging.warning('Fetching source of {0} returned HTTP {1} instead of {2}'.format(
+            logging.warning('Fetching source of "{0}" returned HTTP {1} instead of {2}'.format(
                 url, response.status_code, requests.codes.ok
             ))
     return response.text
@@ -130,13 +131,16 @@ def select(url, xpath, session=None):
     try:
         response = session.get(url) if session is not None else requests.get(url)
         response.raise_for_status()
-    except (ConnectionError, requests.HTTPError) as err:
-        # TODO: Handle exceptions more atomical
-        logging.error(err.message)
+    except requests.RequestException as err:
+        logging.error('Cannot select "{0}" on {1}: {2}'.format(xpath, url, err))
         return None
     else:
         response_source = response.text
-    selected = html.fromstring(response_source).xpath(xpath)
+    try:
+        selected = html.fromstring(response_source).xpath(xpath)
+    except (TypeError, XPathEvalError) as select_err:
+        logging.error('Selection of "{0}" on {1} failed: {2}'.format(xpath, url, select_err))
+        selected = None
     if selected is None or len(selected) < 1:
         logging.warning('No match for "{0}" on {1}'.format(xpath, url))
         return None
