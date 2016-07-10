@@ -36,6 +36,8 @@ QIS_URL_INITIAL = QIS_URL_BASE + '/rds?state=user&type=0'
 SELECTOR_EXAM_MANAGEMENT_LINK = '//a[contains(text(), "Prüfungsverwaltung")]/@href'
 SELECTOR_GRADE_OVERVIEW_LINK = '//a[contains(text(), "Notenspiegel")]/@href'
 SELECTOR_GRADE_OVERVIEW_GRADUATION_LINK = '//a[contains(@title, "Leistungen anzeigen")]/@href'
+SELECTOR_GRADES_STUDENT_INFO = '//table[contains(@summary, "Liste der Stammdaten des Studierenden")]'
+SELECTOR_GRADES_TABLE = '//*[@id="wrapper"]/div[6]/div[2]/form/table[2]/tbody'
 
 # Application settings
 LOGGING_LEVEL = logging.DEBUG
@@ -69,7 +71,7 @@ def login():
     """
     session = determine_session_id(requests.Session())
     if session is None:
-        logging.error('Cannot attempt login without initial session ID')
+        logging.error('Cannot authenticate without initial session ID')
         return None, False, None
     logging.debug('Attempting login...')
     try:
@@ -79,8 +81,8 @@ def login():
             'submit': 'Ok'
         })
         response.raise_for_status()
-    except (ConnectionError, requests.HTTPError) as err:
-        logging.error('Failed to authenticate: ' + err.message)
+    except requests.RequestException as err:
+        logging.error('Authentication failed: {0}'.format(err))
         session, redirect_url = None
     else:
         redirect_url = response.url if response.status_code == requests.codes.ok else None
