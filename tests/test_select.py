@@ -26,7 +26,6 @@ class TestSelect(unittest.TestCase):
 class TestSelectFirst(unittest.TestCase):
 
     def test_select_first_positive(self):
-        pass
-
-    def test_select_first_negative(self):
-        pass
+        result = select_first('https://httpbin.org/', '//*[@id="manpage"]/div/ul[1]/li/a')
+        self.assertIsNotNone(result)
+        self.assertEqual(result.get('href'), '/')

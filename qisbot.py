@@ -149,7 +149,7 @@ def select(url, xpath, session=None):
     return selected
 
 
-def select_first(url, xpath, session):
+def select_first(url, xpath, session=None):
     """Select the first element that matches the xpath on a given site.
 
     :type url: str
