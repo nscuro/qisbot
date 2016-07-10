@@ -91,6 +91,31 @@ def login():
     )
 
 
+def fetch_source(url, session=None):
+    """Fetch the source of a given web page.
+
+    :type url: str
+    :type session: requests.Session
+    :rtype (str)
+    """
+    if url is None:
+        logging.warning('Cannot fetch page source: Invalid url')
+        return None
+    logging.debug('Fetching source from ' + url)
+    try:
+        response = session.get(url) if session is not None else requests.get(url)
+        response.raise_for_status()
+    except (ConnectionError, requests.HTTPError) as err:
+        logging.error('Fetching source from ' + url + ' failed')
+        return None
+    else:
+        if response.status_code != requests.codes.ok:
+            logging.warning('Fetching source of {0} returned HTTP {1} instead of {2}'.format(
+                url, response.status_code, requests.codes.ok
+            ))
+    return response.text
+
+
 def select(url, xpath, session=None):
     """Select an element on a given site via xpath.
 
@@ -147,6 +172,7 @@ def fetch_grade_overview(session, base_url):
             SELECTOR_GRADE_OVERVIEW_GRADUATION_LINK,
             session)
     logging.debug('Grade overview URL: ' + grade_overview_url)
+    return fetch_source(grade_overview_url, session)
 
 
 if __name__ == '__main__':
