@@ -36,8 +36,8 @@ QIS_URL_INITIAL = QIS_URL_BASE + '/rds?state=user&type=0'
 SELECTOR_EXAM_MANAGEMENT_LINK = '//a[contains(text(), "Prüfungsverwaltung")]/@href'
 SELECTOR_GRADE_OVERVIEW_LINK = '//a[contains(text(), "Notenspiegel")]/@href'
 SELECTOR_GRADE_OVERVIEW_GRADUATION_LINK = '//a[contains(@title, "Leistungen anzeigen")]/@href'
-SELECTOR_GRADES_STUDENT_INFO = '//table[contains(@summary, "Liste der Stammdaten des Studierenden")]'
-SELECTOR_GRADES_TABLE = '//*[@id="wrapper"]/div[6]/div[2]/form/table[2]/tbody'
+SELECTOR_GRADES_TABLE = '//form/table[2]'
+SELECTOR_GRADES_TABLE_CELLS = './/*[@class != "qis_kontoOnTop" and @class != "tabelleheader"]'
 
 # Application settings
 LOGGING_LEVEL = logging.DEBUG
@@ -179,6 +179,34 @@ def fetch_grade_overview(session, base_url):
             session)
     logging.debug('Grade overview URL: ' + grade_overview_url)
     return fetch_source(grade_overview_url, session)
+
+
+def map_grade_row():
+    """ """
+    # TODO
+    pass
+
+
+def parse_grades(source):
+    """Parse grades from page source.
+
+    :type source: str
+    :rtype (dict)
+    """
+    if source is None:
+        logging.error('Cannot parse grades: No grade overview page source')
+        return False
+    logging.debug('Parsing grades from page source')
+    grade_tree = html.fromstring(source)
+    try:
+        grades_table = grade_tree.xpath(SELECTOR_GRADES_TABLE)
+    except XPathEvalError as eval_err:
+        logging.error('Cannot parse grades: {0}'.format(eval_err))
+        return None
+    if grades_table is None or len(grades_table) < 1:
+        logging.error('Cannot parse grades: Unable to locate grades table')
+        return None
+    return list(map(map_grade_row, grades_table[0].xpath('.//tr')))
 
 
 if __name__ == '__main__':
