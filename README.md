@@ -19,6 +19,8 @@ Benötigte Pakete können mit `pip install -r requirements.txt` installiert werd
 Gefundene Noten können als JSON Datei exportiert werden (`python3 qisbot.py --export <Dateipfad>`).
 Zwischenspeicherung und Aufbereitung der Daten sowie eine Funktionalität zum Erkennen neuer Noten sollen noch folgen.
 
+![Imgur](http://i.imgur.com/98eypwL.png)
+
 ## Nutzung
 Anzeige aller möglichen Funktionen: `python3 qisbot.py -h`
 
