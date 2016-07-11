@@ -15,18 +15,18 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+import os
 import sys
 import json
 import logging
 import requests
 from lxml import html
-from os import environ
 from lxml.etree import XPathEvalError
 
 
 # User credentials
-QIS_USERNAME = environ.get('QIS_USER') or None
-QIS_PASSWORD = environ.get('QIS_PASS') or None
+QIS_USERNAME = os.environ.get('QIS_USER') or None
+QIS_PASSWORD = os.environ.get('QIS_PASS') or None
 
 # Static urls
 QIS_URL_BASE = 'https://qis.fh-kiel.de/qisserver'
@@ -251,8 +251,33 @@ def export_json(grades, destination):
     :type grades: dict
     :type destination: str
     """
+    if os.path.exists(destination):
+        logging.warning('File "{0}" already exists and will be overwritten'.format(destination))
+    if not os.access(destination, os.W_OK):
+        logging.error('Cannot export grades to "{0}": No write permission'.format(destination))
+        return False
+    logging.debug('Exporting grades to "{0}"'.format(destination))
     with open(destination, 'w') as dest_file:
         json.dump(grades, dest_file, indent=True)
+    return True
+
+
+def import_json(source):
+    """Import grades data from a given JSON file.
+
+    :type source: str
+    :rtype (dict)
+    """
+    if not os.path.exists(source):
+        logging.error('Cannot import "{0}": File does not exist'.format(source))
+        return None
+    elif not os.access(source, os.R_OK):
+        logging.error('Cannot import "{0}": No read permission'.format(source))
+        return None
+    logging.debug('Importing grades from "{0}"'.format(source))
+    with open(source, 'r') as source_file:
+        grades = json.load(source_file)
+    return grades
 
 
 if __name__ == '__main__':
