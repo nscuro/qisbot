@@ -27,3 +27,5 @@ Das Wichtigste ist die Bereitstellung Ihrer Zugangsdaten. Dies kann auf 3 versch
 1. Nutzen Sie die `--username` und `--password` Optionen beim Aufruf des Skripts
 2. Hinterlegen Sie Ihre Zugangsdaten beim Start in den Umgebungsvariablen `QIS_USER` und `QIS_PASS`
 3. Ändern Sie die Zeile `QIS_USERNAME = os.environ.get('QIS_USER') or None` in `qisbot.py`, indem Sie `None` durch Ihren Nutzernamen in Anführungszeichen ersetzen. Verfahren Sie genauso auch für die `QIS_PASSWORD` Zeile direkt darunter
+
+Weiterhin muss der Wert der Variable `QIS_URL_BASE` angepasst werden. Dabei handelt es sich um die Url zum QIS Serververzeichnis ihrer Hochschule. Im Normalfall sollten Sie lediglich die Domain anpassen müssen.
