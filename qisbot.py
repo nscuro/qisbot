@@ -37,10 +37,27 @@ SELECTOR_EXAM_MANAGEMENT_LINK = '//a[contains(text(), "Prüfungsverwaltung")]/@h
 SELECTOR_GRADE_OVERVIEW_LINK = '//a[contains(text(), "Notenspiegel")]/@href'
 SELECTOR_GRADE_OVERVIEW_GRADUATION_LINK = '//a[contains(@title, "Leistungen anzeigen")]/@href'
 SELECTOR_GRADES_TABLE = '//form/table[2]'
-SELECTOR_GRADES_TABLE_CELLS = './/*[@class != "qis_kontoOnTop" and @class != "tabelleheader"]'
+SELECTOR_GRADES_TABLE_CELLS = './/*[@class = "tabelle1_alignleft" or @class = "tabelle1_aligncenter"]'
 
 # Application settings
 LOGGING_LEVEL = logging.DEBUG
+
+# Index-based mapping of grade information
+GRADE_MAPPING = [
+    'exam_id',
+    'exam_title',
+    'exam_vert',
+    'exam_ruling',
+    'attempt',
+    'rejection',
+    'semester',
+    'appointment',
+    'grade',
+    'points',
+    'ects',
+    'status',
+    'approved'
+]
 
 
 def determine_session_id(session, from_url=None):
@@ -181,10 +198,21 @@ def fetch_grade_overview(session, base_url):
     return fetch_source(grade_overview_url, session)
 
 
-def map_grade_row():
-    """ """
-    # TODO
-    pass
+def map_grade_row(row):
+    """Maps the cell content of a given table row.
+
+    :type row: html.HtmlElement
+    :rtype (dict)
+    """
+    row_cells = row.xpath(SELECTOR_GRADES_TABLE_CELLS)
+    if len(row_cells) < 1:
+        return None
+    return {
+        key: value for (key, value) in map(
+            lambda x: (GRADE_MAPPING[row_cells.index(x)], x.text.strip() if x.text != '&nbsp' else None),
+            row_cells
+        )
+    }
 
 
 def parse_grades(source):
@@ -206,7 +234,7 @@ def parse_grades(source):
     if grades_table is None or len(grades_table) < 1:
         logging.error('Cannot parse grades: Unable to locate grades table')
         return None
-    return list(map(map_grade_row, grades_table[0].xpath('.//tr')))
+    return list(filter(None, map(map_grade_row, grades_table[0].xpath('.//tr'))))
 
 
 if __name__ == '__main__':
