@@ -20,6 +20,7 @@ import sys
 import json
 import logging
 import requests
+import argparse
 from lxml import html
 from lxml.etree import XPathEvalError
 
@@ -39,9 +40,6 @@ SELECTOR_GRADE_OVERVIEW_LINK = '//a[contains(text(), "Notenspiegel")]/@href'
 SELECTOR_GRADE_OVERVIEW_GRADUATION_LINK = '//a[contains(@title, "Leistungen anzeigen")]/@href'
 SELECTOR_GRADES_TABLE = '//form/table[2]'
 SELECTOR_GRADES_TABLE_CELLS = './/*[@class = "tabelle1_alignleft" or @class = "tabelle1_aligncenter"]'
-
-# Application settings
-LOGGING_LEVEL = logging.DEBUG
 
 # Index-based mapping of grade information
 GRADE_MAPPING = [
@@ -82,11 +80,17 @@ def determine_session_id(session, from_url=None):
         return session
 
 
-def login():
+def login(user=None, password=None):
     """Login as the configured user.
 
     :rtype (requests.Session, bool, str)
     """
+    if user is None:
+        logging.warning('No username specified, falling back to QIS_USERNAME')
+        user = QIS_USERNAME
+    if password is None:
+        logging.warning('No password specified, falling back to QIS_PASSWORD')
+        password = QIS_PASSWORD
     session = determine_session_id(requests.Session())
     if session is None:
         logging.error('Cannot authenticate without initial session ID')
@@ -94,8 +98,8 @@ def login():
     logging.debug('Attempting login...')
     try:
         response = session.post(QIS_URL_LOGIN, data={
-            'username': QIS_USERNAME,
-            'password': QIS_PASSWORD,
+            'username': user,
+            'password': password,
             'submit': 'Ok'
         })
         response.raise_for_status()
@@ -104,7 +108,7 @@ def login():
         session, redirect_url = None
     else:
         redirect_url = response.url if response.status_code == requests.codes.ok else None
-        logging.info('Successfully logged in as ' + QIS_USERNAME)
+        logging.info('Successfully logged in as ' + user)
     return (
         session,
         True if session else False,
@@ -253,12 +257,13 @@ def export_json(grades, destination):
     """
     if os.path.exists(destination):
         logging.warning('File "{0}" already exists and will be overwritten'.format(destination))
-    if not os.access(destination, os.W_OK):
+    if os.path.exists(destination) and not os.access(destination, os.W_OK):
         logging.error('Cannot export grades to "{0}": No write permission'.format(destination))
         return False
     logging.debug('Exporting grades to "{0}"'.format(destination))
     with open(destination, 'w') as dest_file:
         json.dump(grades, dest_file, indent=True)
+    logging.info('Successfully exported grades to "{0}"'.format(destination))
     return True
 
 
@@ -281,9 +286,18 @@ def import_json(source):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(format='%(asctime)s - %(levelname)s: %(message)s', level=LOGGING_LEVEL)
-    bot_session, logged_in, red_url = login()
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument('--username', '-u', help='The username', type=str)
+    argparser.add_argument('--password', '-p', help='The password', type=str)
+    argparser.add_argument('--export', '-e', help='Export grades to JSON file', type=str)
+    argparser.add_argument('--debug', '-d', action='store_true', help='Show debug messages')
+    args = argparser.parse_args()
+    logging.basicConfig(format='%(asctime)s - %(levelname)s: %(message)s',
+                        level=logging.DEBUG if args.debug else logging.INFO)
+    bot_session, logged_in, red_url = login(args.username, args.password)
     if not logged_in:
-        logging.error('Login as {user} failed'.format(user=QIS_USERNAME))
+        logging.error('Login as {user} failed'.format(user=args.username or QIS_USERNAME))
         sys.exit(1)
-    export_json(parse_grades(fetch_grade_overview(bot_session, red_url)), './grades.json')
+    if args.export:
+        if not export_json(parse_grades(fetch_grade_overview(bot_session, red_url)), args.export):
+            sys.exit(1)
