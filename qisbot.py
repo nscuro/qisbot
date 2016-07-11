@@ -22,6 +22,7 @@ import logging
 import requests
 import argparse
 from lxml import html
+from tabulate import tabulate
 from lxml.etree import XPathEvalError
 
 
@@ -285,19 +286,39 @@ def import_json(source):
     return grades
 
 
+def tabulate_grades(grades):
+    """Present grade data in a fancy table.
+
+    :type grades: dict
+    :rtype (str)
+    """
+    if grades is None:
+        logging.warning('Cannot tabulate grades: No grade data')
+        return None
+    table = {}
+    for key in GRADE_MAPPING:
+        # TODO: Have the columns in a fixed order
+        table[key] = list(map(lambda grade: grade.get(key), grades))
+    return tabulate(table, headers='keys', tablefmt='fancy_grid')
+
+
 if __name__ == '__main__':
     argparser = argparse.ArgumentParser()
     argparser.add_argument('--username', '-u', help='The username', type=str)
     argparser.add_argument('--password', '-p', help='The password', type=str)
     argparser.add_argument('--export', '-e', help='Export grades to JSON file', type=str)
+    argparser.add_argument('--tabulate', '-t', action='store_true', help='Display grades in a table')
     argparser.add_argument('--debug', '-d', action='store_true', help='Show debug messages')
     args = argparser.parse_args()
     logging.basicConfig(format='%(asctime)s - %(levelname)s: %(message)s',
-                        level=logging.DEBUG if args.debug else logging.INFO)
+                        level=logging.DEBUG if args.debug else logging.ERROR)
     bot_session, logged_in, red_url = login(args.username, args.password)
     if not logged_in:
         logging.error('Login as {user} failed'.format(user=args.username or QIS_USERNAME))
         sys.exit(1)
+    fetched_grades = parse_grades(fetch_grade_overview(bot_session, red_url))
     if args.export:
-        if not export_json(parse_grades(fetch_grade_overview(bot_session, red_url)), args.export):
+        if not export_json(fetched_grades, args.export):
             sys.exit(1)
+    else:
+        print(tabulate_grades(fetched_grades) if args.tabulate else fetched_grades)
