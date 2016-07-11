@@ -16,6 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import sys
+import json
 import logging
 import requests
 from lxml import html
@@ -74,7 +75,7 @@ def determine_session_id(session, from_url=None):
     try:
         initial_response = session.get(from_url or QIS_URL_INITIAL)
         initial_response.raise_for_status()
-    except (ConnectionError, requests.HTTPError) as err:
+    except (requests.ConnectionError, requests.HTTPError):
         logging.error('Something went wrong while fetching the initial session ID')
         return None
     else:
@@ -234,7 +235,24 @@ def parse_grades(source):
     if grades_table is None or len(grades_table) < 1:
         logging.error('Cannot parse grades: Unable to locate grades table')
         return None
-    return list(filter(None, map(map_grade_row, grades_table[0].xpath('.//tr'))))
+    parsed_grades = list(
+        filter(
+            lambda x: x is not None and x.get('grade') != '',
+            map(map_grade_row, grades_table[0].xpath('.//tr'))
+        )
+    )
+    logging.info('Successfully parsed {0} grades'.format(len(parsed_grades)))
+    return parsed_grades
+
+
+def export_json(grades, destination):
+    """Export a grade dictionary as JSON file.
+
+    :type grades: dict
+    :type destination: str
+    """
+    with open(destination, 'w') as dest_file:
+        json.dump(grades, dest_file, indent=True)
 
 
 if __name__ == '__main__':
@@ -243,4 +261,4 @@ if __name__ == '__main__':
     if not logged_in:
         logging.error('Login as {user} failed'.format(user=QIS_USERNAME))
         sys.exit(1)
-    grade_overview = fetch_grade_overview(bot_session, red_url)
+    export_json(parse_grades(fetch_grade_overview(bot_session, red_url)), './grades.json')
