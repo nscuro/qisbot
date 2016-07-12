@@ -23,6 +23,7 @@ import requests
 import argparse
 from lxml import html
 from tabulate import tabulate
+from collections import OrderedDict
 from lxml.etree import XPathEvalError
 
 
@@ -84,6 +85,8 @@ def determine_session_id(session, from_url=None):
 def login(user=None, password=None):
     """Login as the configured user.
 
+    :type user: str
+    :type password: str
     :rtype (requests.Session, bool, str)
     """
     if user is None:
@@ -178,6 +181,7 @@ def select_first(url, xpath, session=None):
     :type url: str
     :type xpath: str
     :type session: requests.Session
+    :rtype html.HtmlElement
     """
     result = select(url, xpath, session)
     return result[0] if result else None
@@ -255,6 +259,7 @@ def export_json(grades, destination):
 
     :type grades: dict
     :type destination: str
+    :rtype (bool)
     """
     if os.path.exists(destination):
         logging.warning('File "{0}" already exists and will be overwritten'.format(destination))
@@ -295,10 +300,9 @@ def tabulate_grades(grades):
     if grades is None:
         logging.warning('Cannot tabulate grades: No grade data')
         return None
-    table = {}
-    for key in GRADE_MAPPING:
-        # TODO: Have the columns in a fixed order
-        table[key] = list(map(lambda grade: grade.get(key), grades))
+    table = OrderedDict()
+    table.update(list(map(lambda key: (key, list(map(lambda grade: grade.get(key), grades))), GRADE_MAPPING)))
+    table = OrderedDict((key, values) for (key, values) in table.items() if None not in values and '' not in values)
     return tabulate(table, headers='keys', tablefmt='fancy_grid')
 
 
