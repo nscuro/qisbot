@@ -11,6 +11,7 @@ Ich kann nicht dafür garantieren, dass die Anwendung für das System jeder Univ
 - Python >= 3.4
 - requests >= 2.10.0
 - lxml >= 3.6.0
+- tabulate >= 0.7.5
 
 Benötigte Pakete können mit `pip install -r requirements.txt` installiert werden.
 
@@ -18,6 +19,8 @@ Benötigte Pakete können mit `pip install -r requirements.txt` installiert werd
 ***qisbot*** kann sich eigenständig auf QIS Servern anmelden und den Notenspiegel abrufen.
 Gefundene Noten können als JSON Datei exportiert werden (`python3 qisbot.py --export <Dateipfad>`).
 Zwischenspeicherung und Aufbereitung der Daten sowie eine Funktionalität zum Erkennen neuer Noten sollen noch folgen.
+
+![Imgur](http://i.imgur.com/98eypwL.png)
 
 ## Nutzung
 Anzeige aller möglichen Funktionen: `python3 qisbot.py -h`
