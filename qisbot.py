@@ -41,7 +41,8 @@ SELECTOR_EXAM_MANAGEMENT_LINK = '//a[contains(text(), "Prüfungsverwaltung")]/@h
 SELECTOR_GRADE_OVERVIEW_LINK = '//a[contains(text(), "Notenspiegel")]/@href'
 SELECTOR_GRADE_OVERVIEW_GRADUATION_LINK = '//a[contains(@title, "Leistungen anzeigen")]/@href'
 SELECTOR_GRADES_TABLE = '//form/table[2]'
-SELECTOR_GRADES_TABLE_CELLS = './/*[@class = "tabelle1_alignleft" or @class = "tabelle1_aligncenter"]'
+SELECTOR_GRADES_TABLE_CELLS = './/*[@class = "tabelle1_alignleft" or @class = "tabelle1_aligncenter" ' \
+                              'or @class = "tabelle1_alignright"]'
 
 # Index-based mapping of grade information
 GRADE_MAPPING = [
@@ -219,7 +220,7 @@ def map_grade_row(row):
         return None
     return {
         key: value for (key, value) in map(
-            lambda x: (GRADE_MAPPING[row_cells.index(x)], x.text.strip() if x.text != '&nbsp' else None),
+            lambda x: (GRADE_MAPPING[row_cells.index(x)], x.text_content().strip() if x.text != '&nbsp' else None),
             row_cells
         )
     }
@@ -314,7 +315,7 @@ if __name__ == '__main__':
     argparser.add_argument('--tabulate', '-t', action='store_true', help='Display grades in a table')
     argparser.add_argument('--debug', '-d', action='store_true', help='Show debug messages')
     args = argparser.parse_args()
-    if (not args.username or not args.password) or (not QIS_USERNAME or not QIS_PASSWORD):
+    if (not QIS_USERNAME or not QIS_PASSWORD) and (not args.username or not args.password):
         argparser.print_help()
         sys.exit(2)
     logging.basicConfig(format='%(asctime)s - %(levelname)s: %(message)s',
