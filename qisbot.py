@@ -255,6 +255,21 @@ def parse_grades(source):
     return parsed_grades
 
 
+def detect_changes(grades_old, grades_new):
+    """Detect changes in two list of grades.
+
+    Note that no changes will be detected if grades_new contains
+    less elements than grades_old. As deletion of grades should be
+    very unlikely, this does not really matter, should be noted though.
+
+    :type grades_old: list
+    :type grades_new: list
+    :rtype (list)
+    """
+    return list(filter(lambda x: x not in grades_old, grades_new)) + \
+        list(filter(lambda x: x not in grades_new, grades_old))
+
+
 def export_json(grades, destination):
     """Export a grade dictionary as JSON file.
 
