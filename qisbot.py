@@ -341,21 +341,19 @@ if __name__ == '__main__':
         logging.error('Login as {user} failed'.format(user=args.username or QIS_USERNAME))
         sys.exit(1)
     fetched_grades = parse_grades(fetch_grade_overview(bot_session, red_url))
-    if args.export:
-        if not export_json(fetched_grades, args.export):
-            sys.exit(1)
-    elif args.compare:
+    if args.compare:
         old_grades = import_json(args.compare)
         if old_grades is None:
             logging.error('Unable to compare grades: Importing old grades failed')
             sys.exit(1)
         compare_result = detect_changes(old_grades, fetched_grades)
-        if len(compare_result) < 1:
-            print('No new grades found. Here are your current grades:\n')
+        if len(compare_result) < 1 and args.tabulate:
+            print('\nNo new grades found. Here are your current grades:\n')
             print(tabulate_grades(fetched_grades) if args.tabulate else fetched_grades)
-            sys.exit(0)
-        else:
+        elif len(compare_result) > 0 and args.tabulate:
             print(tabulate_grades(compare_result) if args.tabulate else compare_result)
-            sys.exit(0)
+    if args.export:
+        if not export_json(fetched_grades, args.export):
+            sys.exit(1)
     else:
         print(tabulate_grades(fetched_grades) if args.tabulate else fetched_grades)
