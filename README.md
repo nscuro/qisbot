@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/scuroworks/qisbot.svg?token=24qz67tadxUHqtNZeoJu&branch=develop)](https://travis-ci.com/scuroworks/qisbot)
+[![Build Status](https://travis-ci.org/scuroworks/qisbot.svg?branch=develop)](https://travis-ci.org/scuroworks/qisbot)
 
 # qisbot
 Schnelles und einfaches Auslesen des Notenspiegels von QIS Systemen.
@@ -18,9 +18,9 @@ Benötigte Pakete können mit `pip install -r requirements.txt` installiert werd
 ## Funktionen
 ***qisbot*** kann sich eigenständig auf QIS Servern anmelden und den Notenspiegel abrufen.
 Gefundene Noten können als JSON Datei exportiert werden (`python3 qisbot.py --export <Dateipfad>`).
-Zwischenspeicherung und Aufbereitung der Daten sowie eine Funktionalität zum Erkennen neuer Noten sollen noch folgen.
+Zwischenspeicherung der Daten sowie eine Funktionalität zum Erkennen neuer Noten sollen noch folgen.
 
-![Imgur](http://i.imgur.com/98eypwL.png)
+![Nutzungsbeispiel](http://i.imgur.com/seiih6v.png)
 
 ## Nutzung
 Anzeige aller möglichen Funktionen: `python3 qisbot.py -h`
