@@ -230,7 +230,7 @@ def parse_grades(source):
     """Parse grades from page source.
 
     :type source: str
-    :rtype (dict)
+    :rtype (list)
     """
     if source is None:
         logging.error('Cannot parse grades: No grade overview page source')
@@ -273,7 +273,7 @@ def detect_changes(grades_old, grades_new):
 def export_json(grades, destination):
     """Export a grade dictionary as JSON file.
 
-    :type grades: dict
+    :type grades: list
     :type destination: str
     :rtype (bool)
     """
@@ -293,7 +293,7 @@ def import_json(source):
     """Import grades data from a given JSON file.
 
     :type source: str
-    :rtype (dict)
+    :rtype (list)
     """
     if not os.path.exists(source):
         logging.error('Cannot import "{0}": File does not exist'.format(source))
@@ -310,7 +310,7 @@ def import_json(source):
 def tabulate_grades(grades):
     """Present grade data in a fancy table.
 
-    :type grades: dict
+    :type grades: list
     :rtype (str)
     """
     if grades is None:
@@ -327,6 +327,7 @@ if __name__ == '__main__':
     argparser.add_argument('--username', '-u', help='The username', type=str)
     argparser.add_argument('--password', '-p', help='The password', type=str)
     argparser.add_argument('--export', '-e', help='Export grades to JSON file', type=str)
+    argparser.add_argument('--compare', '-c', help='Compare fetched grades with JSON file', type=str)
     argparser.add_argument('--tabulate', '-t', action='store_true', help='Display grades in a table')
     argparser.add_argument('--debug', '-d', action='store_true', help='Show debug messages')
     args = argparser.parse_args()
@@ -343,5 +344,18 @@ if __name__ == '__main__':
     if args.export:
         if not export_json(fetched_grades, args.export):
             sys.exit(1)
+    elif args.compare:
+        old_grades = import_json(args.compare)
+        if old_grades is None:
+            logging.error('Unable to compare grades: Importing old grades failed')
+            sys.exit(1)
+        compare_result = detect_changes(old_grades, fetched_grades)
+        if len(compare_result) < 1:
+            print('No new grades found. Here are your current grades:\n')
+            print(tabulate_grades(fetched_grades) if args.tabulate else fetched_grades)
+            sys.exit(0)
+        else:
+            print(tabulate_grades(compare_result) if args.tabulate else compare_result)
+            sys.exit(0)
     else:
         print(tabulate_grades(fetched_grades) if args.tabulate else fetched_grades)
