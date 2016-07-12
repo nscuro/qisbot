@@ -13,14 +13,26 @@ Ich kann nicht dafür garantieren, dass die Anwendung für das System jeder Univ
 - lxml >= 3.6.0
 - tabulate >= 0.7.5
 
-Benötigte Pakete können mit `pip install -r requirements.txt` installiert werden.
+Benötigte Pakete können mit `pip3 install -r requirements.txt` installiert werden.
 
 ## Funktionen
 ***qisbot*** kann sich eigenständig auf QIS Servern anmelden und den Notenspiegel abrufen.
-Gefundene Noten können als JSON Datei exportiert werden (`python3 qisbot.py --export <Dateipfad>`).
-Zwischenspeicherung der Daten sowie eine Funktionalität zum Erkennen neuer Noten sollen noch folgen.
-
+Die Ausgabe der Daten erfolgt standardmäßig im JSON Format. Mit der Option `--tabulate` lassen
+sich die Ergebnisse in einer übersichtlichen Tabelle darstellen:
 ![Nutzungsbeispiel](http://i.imgur.com/seiih6v.png)
+
+Gefundene Noten können als JSON Datei exportiert werden (`python3 qisbot.py --export <Dateipfad>`).
+Zuvor exportierte Daten lassen sich später zum ermitteln neu eingestellter Noten verwenden, indem
+sie mit erneut abgerufenen Daten verglichen werden: 
+![Beispiel Neue Noten](http://i.imgur.com/hotZK3N.png)
+
+## Installation
+1. Laden Sie sich das Repository als ZIP Datei herunter oder klonen Sie es via `git clone`
+2. Installieren Sie die Abhängigkeiten via `pip3 install -r requirements.txt`
+
+Sie können qisbot nun direkt ausführen oder das Skript via `python3 setup.py install` installieren.
+Die Installation sorgt dafür, dass das Skript im `/bin` bzw `Scripts` Verzeichnis Ihrer Python-Installation 
+bzw Ihres Systems hinterlegt wird und von dort aufrufbar ist.
 
 ## Nutzung
 Anzeige aller möglichen Funktionen: `python3 qisbot.py -h`
