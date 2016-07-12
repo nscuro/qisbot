@@ -314,6 +314,9 @@ if __name__ == '__main__':
     argparser.add_argument('--tabulate', '-t', action='store_true', help='Display grades in a table')
     argparser.add_argument('--debug', '-d', action='store_true', help='Show debug messages')
     args = argparser.parse_args()
+    if (not args.username or not args.password) or (not QIS_USERNAME or not QIS_PASSWORD):
+        argparser.print_help()
+        sys.exit(2)
     logging.basicConfig(format='%(asctime)s - %(levelname)s: %(message)s',
                         level=logging.DEBUG if args.debug else logging.ERROR)
     bot_session, logged_in, red_url = login(args.username, args.password)
