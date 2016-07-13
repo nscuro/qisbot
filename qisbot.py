@@ -266,8 +266,8 @@ def detect_changes(grades_old, grades_new):
     :type grades_new: list
     :rtype (list)
     """
-    return list(filter(lambda x: x not in grades_old, grades_new)) + \
-        list(filter(lambda x: x not in grades_new, grades_old))
+    return list(filter(lambda og: og not in grades_old, list(filter(lambda x: x not in grades_old, grades_new)) +
+                       list(filter(lambda x: x not in grades_new, grades_old))))
 
 
 def export_json(grades, destination):
