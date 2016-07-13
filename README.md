@@ -44,3 +44,14 @@ Das Wichtigste ist die Bereitstellung Ihrer Zugangsdaten. Dies kann auf 3 versch
 3. Ändern Sie die Zeile `QIS_USERNAME = os.environ.get('QIS_USER') or None` in `qisbot.py`, indem Sie `None` durch Ihren Nutzernamen in Anführungszeichen ersetzen. Verfahren Sie genauso auch für die `QIS_PASSWORD` Zeile direkt darunter
 
 Weiterhin muss der Wert der Variable `QIS_URL_BASE` angepasst werden. Dabei handelt es sich um die Url zum QIS Serververzeichnis ihrer Hochschule. Im Normalfall sollten Sie lediglich die Domain anpassen müssen.
+
+### Nutzung als Service
+Wenn Sie ***qisbot*** als Service nutzen möchten (bspw. via Cronjob), empfiehlt sich folgender Aufruf:
+`python3 qisbot.py --user <USER> --password <PASSWORD> --compare <FILE> --export <FILE>`
+wobei beide Dateipfade zur selben Datei zeigen sollten. ***qisbot*** wird zuerst die neuen Daten mit den
+"alten" vergleichen und dann den kompletten Datensatz erneut in der Datei speichern. Bei wiederholenden Aufrufen
+werden Sie so erst eine Ausgabe erhalten, wenn es wirklich neue Daten gibt. Wollen Sie diese Funktionalität auch manuell
+nutzen, verwenden Sie einfach die `--tabulate` Option.
+
+**WICHTIG:** Sie sollten mindestens ein mal Daten in die Datei exportiert haben, ohne einen Vergleich
+mit `--compare` anzufordern. Findet ***qisbot*** die Eingabedatei beim Vergleich nicht, wird er abbrechen.
