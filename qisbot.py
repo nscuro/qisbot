@@ -349,11 +349,11 @@ if __name__ == '__main__':
         compare_result = detect_changes(old_grades, fetched_grades)
         if len(compare_result) < 1 and args.tabulate:
             print('\nNo new grades found. Here are your current grades:\n')
-            print(tabulate_grades(fetched_grades) if args.tabulate else fetched_grades)
+            print(tabulate_grades(fetched_grades) if args.tabulate else json.dumps(fetched_grades, indent=True))
         elif len(compare_result) > 0 and args.tabulate:
-            print(tabulate_grades(compare_result) if args.tabulate else compare_result)
+            print(tabulate_grades(compare_result) if args.tabulate else json.dumps(compare_result, indent=True))
     if args.export:
         if not export_json(fetched_grades, args.export):
             sys.exit(1)
     else:
-        print(tabulate_grades(fetched_grades) if args.tabulate else fetched_grades)
+        print(tabulate_grades(fetched_grades) if args.tabulate else json.dumps(fetched_grades, indent=True))
