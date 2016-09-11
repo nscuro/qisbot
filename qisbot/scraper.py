@@ -1,4 +1,5 @@
 import typing
+
 import requests
 from lxml import html
 from lxml.etree import ParserError
@@ -36,7 +37,7 @@ def select_all(source: str, xpath: str) -> typing.List[html.HtmlElement]:
         ValueError: When source contains malformed URL or xpath is not a valid expression
     """
     try:
-        parsed_source = html.fromstring(source)
+        parsed_source = html.document_fromstring(source)
     except ParserError as perr:
         raise ValueError('Source contains malformed HTML') from perr
     else:
