@@ -1,7 +1,8 @@
 import requests
+from lxml.etree import strip_tags
+
 from qisbot import scraper
 from qisbot.qis import selectors
-from lxml.etree import strip_tags
 
 
 def is_logged_in(session: requests.Session, login_url: str) -> bool:
@@ -9,7 +10,7 @@ def is_logged_in(session: requests.Session, login_url: str) -> bool:
 
     Args:
         session: The session to check the login status on
-        login_url:
+        login_url: URL pointing to the QIS login page
     Returns:
         True when user is logged in, otherwise False
     Raises:
@@ -43,7 +44,7 @@ def login(login_url: str, username: str, password: str, session: requests.Sessio
          A logged in session
     Raises:
         ValueError: When any non-optional parameter is missing
-        LookupError: When scraping the login page failed
+        scraper.ElementNotFoundError: When a web element could not be found
         IOError: When the login failed
     """
     if not login_url:
@@ -63,13 +64,13 @@ def login(login_url: str, username: str, password: str, session: requests.Sessio
     login_source = scraper.fetch_source(login_url, session=login_session)
     form_element = scraper.select(login_source, selectors.LOGIN_FORM)
     if form_element is None:
-        raise LookupError('No form element found on login page')
+        raise scraper.ElementNotFoundError('No form element found on login page')
     action_url = form_element.get('action')
     if action_url is None:
-        raise LookupError('Cannot determine action URL')
+        raise scraper.ElementNotFoundError('Cannot determine action URL')
     submit_value = form_element.xpath(selectors.LOGIN_FORM_SUBMIT)
     if submit_value is None:
-        raise LookupError('Cannot determine submit value')
+        raise scraper.ElementNotFoundError('Cannot determine submit value')
     # Perform login request
     login_response = login_session.post(action_url, data={
         'username': username,

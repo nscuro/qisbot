@@ -51,12 +51,12 @@ class TestSelect(unittest.TestCase):
         self.assertIs(len(selected), 1)
 
     def test_select_all_invalid_source(self):
-        with self.assertRaises(ValueError) as context:
+        with self.assertRaises(scraper.ScraperError) as context:
             scraper.select_all('<<<<', '')  # XPath not relevant in this scenario
         self.assertIn('malformed html', str(context.exception).lower())
 
     def test_select_all_invalid_xpath(self):
-        with self.assertRaises(ValueError) as context:
+        with self.assertRaises(scraper.ScraperError) as context:
             scraper.select_all(self.source_valid, 'damn_invalid_xpath!241?#')
         self.assertIn('not a valid xpath expression', str(context.exception).lower())
 

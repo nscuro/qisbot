@@ -6,6 +6,16 @@ from lxml.etree import ParserError
 from lxml.etree import XPathEvalError
 
 
+class ScraperError(IOError):
+    """Raised when a scraper function encounters an internal error."""
+    pass
+
+
+class ElementNotFoundError(LookupError):
+    """Raised when a requested html element was not found."""
+    pass
+
+
 def fetch_source(url: str, session: requests.Session = None) -> str:
     """Fetch the source of a page from the given URL.
 
@@ -34,17 +44,17 @@ def select_all(source: str, xpath: str) -> typing.List[html.HtmlElement]:
     Returns:
         List of matching elements
     Raises:
-        ValueError: When source contains malformed URL or xpath is not a valid expression
+        ScraperError: When source contains malformed URL or xpath is not a valid expression
     """
     try:
         parsed_source = html.document_fromstring(source)
     except ParserError as perr:
-        raise ValueError('Source contains malformed HTML') from perr
+        raise ScraperError('Source contains malformed HTML') from perr
     else:
         try:
             selected_elements = parsed_source.xpath(xpath)
         except XPathEvalError as xperr:
-            raise ValueError('{} is not a valid XPath expression'.format(xpath)) from xperr
+            raise ScraperError('{} is not a valid XPath expression'.format(xpath)) from xperr
         else:
             return selected_elements
 
@@ -58,7 +68,7 @@ def select(source: str, xpath: str) -> typing.Optional[html.HtmlElement]:
     Returns:
         A matching element or None
     Raises:
-        ValueError: When source contains malformed URL or xpath is not a valid expression
+        ScraperError: When source contains malformed URL or xpath is not a valid expression
     """
     selected_elements = select_all(source, xpath)
     return selected_elements[0] if selected_elements else None
