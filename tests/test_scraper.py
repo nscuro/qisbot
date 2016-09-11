@@ -1,10 +1,11 @@
 import unittest
-from qisbot import scraper
+
 from requests import RequestException
+
+from qisbot import scraper
 
 
 class TestFetchSource(unittest.TestCase):
-
     def test_fetch_source_success(self):
         source = scraper.fetch_source('https://httpbin.org/get')
         self.assertIsNotNone(source)
@@ -28,7 +29,6 @@ class TestFetchSource(unittest.TestCase):
 
 
 class TestSelect(unittest.TestCase):
-
     source_valid = """
     <body>
         <h1 class='testclass'>testtitle</h1>
