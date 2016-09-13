@@ -49,17 +49,17 @@ class TestSelect(unittest.TestCase):
             self.assertIn('testitem', element.text)
 
     def test_select_all_success_single(self):
-        selected = scraper.select_all(scraper.FetchedPage(self.source_valid, '//*[@class = "testclass"]'))
+        selected = scraper.select_all(scraper.FetchedPage(self.source_valid), '//*[@class = "testclass"]')
         self.assertIs(len(selected), 1)
 
     def test_select_all_invalid_source(self):
         with self.assertRaises(scraper.ScraperError) as context:
-            scraper.select_all(scraper.FetchedPage('<<<<<<<', ''))  # XPath not relevant in this scenario
+            scraper.select_all(scraper.FetchedPage('<<<<<<<'))  # XPath not relevant in this scenario
         self.assertIn('malformed html', str(context.exception).lower())
 
     def test_select_all_invalid_xpath(self):
         with self.assertRaises(scraper.ScraperError) as context:
-            scraper.select_all(scraper.FetchedPage(self.source_valid, 'damn_invalid_xpath!241?#'))
+            scraper.select_all(scraper.FetchedPage(self.source_valid), 'damn_invalid_xpath!241?#')
         self.assertIn('not a valid xpath expression', str(context.exception).lower())
 
     def test_select_success(self):
