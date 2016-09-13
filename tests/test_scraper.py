@@ -1,4 +1,5 @@
 import unittest
+from unittest import mock
 
 import requests
 from lxml import html
@@ -69,18 +70,26 @@ class TestSelect(unittest.TestCase):
 
 
 class TestNavigate(unittest.TestCase):
+    def setUp(self):
+        self.html_source = """
+        <body>
+            <h1><a href="/1">TESTLINK1</a></h1>
+            <em><a href="/2">TESTLINK2</a></em>
+            <div><ul><a href="/3">TESTLINK3</a></ul></div>
+        </body>
+        """
+        self.successful_response = requests.Response()
+        self.successful_response.status_code = 200
 
-    def test_navigation(self):
-        destination = scraper.navigate('https://httpbin.org/', [
-            '//a[text() = "HTTP"]/@href',
-            '//a[text() = "HTTPS"]/@href',
-            '//a[text() = "EU"]/@href'
+    @mock.patch('requests.get')
+    @mock.patch('requests.Response.text', new_callable=mock.PropertyMock)
+    def test_navigation(self, mock_response_text, mock_requests_get):
+        mock_response_text.return_value = self.html_source
+        mock_requests_get.return_value = self.successful_response
+        destination = scraper.navigate('http://testli.nk/0', [
+            '//a[text() = "TESTLINK1"]/@href',
+            '//a[text() = "TESTLINK2"]/@href',
+            '//a[text() = "TESTLINK3"]/@href'
         ])
-        self.assertEqual('http://eu.httpbin.org/', destination.url)
+        self.assertEqual('http://testli.nk/3', destination.url)
         self.assertIsNotNone(destination.document)
-
-    def test_invalid_selector(self):
-        with self.assertRaises(scraper.ScraperError):
-            scraper.navigate('https://httpbin.org/', [
-                '//a[text() = "HTTP"]'
-            ])
