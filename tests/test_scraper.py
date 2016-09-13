@@ -1,6 +1,7 @@
 import unittest
 
-from requests import RequestException
+import requests
+from lxml import html
 
 from qisbot import scraper
 
@@ -19,12 +20,13 @@ class TestFetchSource(unittest.TestCase):
             scraper.fetch_source(' ')
 
     def test_fetch_source_http_redirect(self):
-        source = scraper.fetch_source('https://httpbin.org/absolute-redirect/1')
-        self.assertIn('python-requests', source, '')
+        page = scraper.fetch_source('https://httpbin.org/absolute-redirect/1')
+        self.assertIn('python-requests', str(html.tostring(page.document)))
 
     def test_fetch_source_http_status_error(self):
-        with self.assertRaises(RequestException):
+        with self.assertRaises(requests.RequestException):
             scraper.fetch_source('https://httpbin.org/status/400')
+        with self.assertRaises(requests.RequestException):
             scraper.fetch_source('https://httpbin.org/status/500')
 
 
@@ -41,26 +43,44 @@ class TestSelect(unittest.TestCase):
     """
 
     def test_select_all_success(self):
-        selected = scraper.select_all(self.source_valid, '//ul/li')
+        selected = scraper.select_all(scraper.FetchedPage(self.source_valid), '//ul/li')
         self.assertIs(len(selected), 3)
         for element in selected:
             self.assertIn('testitem', element.text)
 
     def test_select_all_success_single(self):
-        selected = scraper.select_all(self.source_valid, '//*[@class = "testclass"]')
+        selected = scraper.select_all(scraper.FetchedPage(self.source_valid, '//*[@class = "testclass"]'))
         self.assertIs(len(selected), 1)
 
     def test_select_all_invalid_source(self):
         with self.assertRaises(scraper.ScraperError) as context:
-            scraper.select_all('<<<<', '')  # XPath not relevant in this scenario
+            scraper.select_all(scraper.FetchedPage('<<<<<<<', ''))  # XPath not relevant in this scenario
         self.assertIn('malformed html', str(context.exception).lower())
 
     def test_select_all_invalid_xpath(self):
         with self.assertRaises(scraper.ScraperError) as context:
-            scraper.select_all(self.source_valid, 'damn_invalid_xpath!241?#')
+            scraper.select_all(scraper.FetchedPage(self.source_valid, 'damn_invalid_xpath!241?#'))
         self.assertIn('not a valid xpath expression', str(context.exception).lower())
 
     def test_select_success(self):
-        selected = scraper.select(self.source_valid, '//li[text() = "testitem 1"]')
+        selected = scraper.select(scraper.FetchedPage(self.source_valid), '//li[text() = "testitem 1"]')
         self.assertIsNotNone(selected)
         self.assertEqual(selected.text, 'testitem 1')
+
+
+class TestNavigate(unittest.TestCase):
+
+    def test_navigation(self):
+        destination = scraper.navigate('https://httpbin.org/', [
+            '//a[text() = "HTTP"]/@href',
+            '//a[text() = "HTTPS"]/@href',
+            '//a[text() = "EU"]/@href'
+        ])
+        self.assertEqual('http://eu.httpbin.org/', destination.url)
+        self.assertIsNotNone(destination.document)
+
+    def test_invalid_selector(self):
+        with self.assertRaises(scraper.ScraperError):
+            scraper.navigate('https://httpbin.org/', [
+                '//a[text() = "HTTP"]'
+            ])

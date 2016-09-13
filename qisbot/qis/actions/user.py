@@ -21,13 +21,13 @@ def is_logged_in(session: requests.Session, login_url: str) -> bool:
     if 'JSESSIONID' not in session.cookies.keys():
         # This session can't be logged in without JSESSIONID cookie
         return False
-    login_source = scraper.fetch_source(login_url, session=session)
-    login_action_link = scraper.select(login_source, selectors.LOGIN_ACTION_LINK)
+    login_page = scraper.fetch_source(login_url, session=session)
+    login_action_link = scraper.select(login_page, selectors.LOGIN_ACTION_LINK)
     if login_action_link is None:
         return False
     strip_tags(login_action_link, 'u')
     link_text = login_action_link.text.replace('"', '').strip().lower()
-    if link_text == 'abmelden' or link_text == 'logout':
+    if link_text in ('abmelden', 'logout'):
         return True
     return False
 
