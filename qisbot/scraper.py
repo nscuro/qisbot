@@ -1,4 +1,5 @@
 import typing
+from contextlib import contextmanager
 
 import requests
 from lxml import html
@@ -15,6 +16,20 @@ class Scraper(object):
         self._current_location = None  # type: str
         self._current_status = None  # type: int
         self.allow_redirects = True
+
+    @contextmanager
+    def permit_redirects(self, permit=True):
+        """Permit or forbid redirects in a context.
+
+        Args:
+            permit: Indicate whether or not to permit redirects
+        Yields:
+            This Scraper instance
+        """
+        default_value = self.allow_redirects
+        self.allow_redirects = permit
+        yield self
+        self.allow_redirects = default_value
 
     def fetch(self, url: str) -> html.HtmlElement:
         """Fetch a web page from a given URL.
@@ -45,7 +60,7 @@ class Scraper(object):
         return document
 
     def select(self, xpath: str, document: html.HtmlElement = None) -> typing.Union[
-             bool, float, str, typing.List[html.HtmlElement]]:
+               bool, float, str, typing.List[html.HtmlElement]]:
         """Perform a selection on a given HTML document.
 
         As documented in the lxml API documentation, the result of an XPath query
@@ -78,7 +93,7 @@ class Scraper(object):
         return result
 
     def check(self, xpath: str, document: html.HtmlElement = None) -> bool:
-        """Execute a boolean XPath expression.
+        """Execute a boolean XPath expression and validate the result's type.
 
         Args:
             xpath: The XPath containing a boolean expression
@@ -93,6 +108,38 @@ class Scraper(object):
             raise ScraperException('Cannot check "{}": Result is not a boolean'.format(xpath)) from TypeError
         return result
 
+    def number(self, xpath: str, document: html.HtmlElement = None) -> float:
+        """Execute an XPath expression that returns a number and validate the result's type.
+
+        Args:
+            xpath: The XPath to execute
+            document: The document to execute the expression on
+        Returns:
+            The desired number as float
+        Raises:
+            ScraperException: When the result of the expression is not a number
+        """
+        result = self.select(xpath, document)
+        if not isinstance(result, float):
+            raise ScraperException('Result of "{}" is not a number'.format(xpath)) from TypeError
+        return result
+
+    def find_all(self, xpath: str, document: html.HtmlElement = None) -> typing.List[html.HtmlElement]:
+        """Execute an XPath expression that returns one or more HtmlElements and validate the result's type.
+
+        Args:
+            xpath: The XPath expression to execute
+            document: The document to execute the expression on
+        Returns:
+            A list of all matching elements
+        Raises:
+            ScraperException: When the result is not a list of HtmlElements
+        """
+        result = self.select(xpath, document)
+        if not isinstance(result, list):
+            raise ScraperException('Result of "{}" is not a list of HtmlElements'.format(xpath)) from TypeError
+        return result
+
     def navigate(self, xpaths: typing.List[str], url: str) -> typing.Generator[
                  typing.Tuple[str, html.HtmlElement], None, typing.Tuple[str, html.HtmlElement]]:
         """Navigate through multiple pages.
@@ -103,7 +150,7 @@ class Scraper(object):
         Yields:
             A touple of the currently visited url and document
         Returns:
-            A touple of the final url and document
+            A tuple of the final url and document
         Raises:
             ValueError: When either xpaths or url were not provided
             ScraperError: When an XPath expression did not select a link or

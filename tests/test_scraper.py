@@ -24,15 +24,20 @@ class TestFetching(unittest.TestCase):
 
     def test_fetching_redirect(self):
         """Redirects shall be performed before the document is parsed."""
-        doc = self.scraper.fetch('https://httpbin.org/redirect/3')
+        self.scraper.allow_redirects = False
+        with self.scraper.permit_redirects(True) as permissive_scraper:
+            doc = permissive_scraper.fetch('https://httpbin.org/redirect/3')
+        self.assertIs(self.scraper.allow_redirects, False)
         self.assertEqual(self.scraper.status, 200)
         self.assertIsInstance(doc, html.HtmlElement)
         self.assertIn('python-requests', str(html.tostring(doc)))
 
     def test_fetching_disallow_redirects(self):
         """It should be possible to disallow redirects and still fetch & parse a document."""
-        self.scraper.allow_redirects = False
-        doc = self.scraper.fetch('https://httpbin.org/redirect/1')
+        self.scraper.allow_redirects = True
+        with self.scraper.permit_redirects(False) as dismissive_scraper:
+            doc = dismissive_scraper.fetch('https://httpbin.org/redirect/1')
+        self.assertIs(self.scraper.allow_redirects, True)
         self.assertEqual(self.scraper.status, 302)
         self.assertIsInstance(doc, html.HtmlElement)
         self.assertIn('redirecting', str(html.tostring(doc)).lower())
@@ -87,7 +92,11 @@ class TestSelection(unittest.TestCase):
                 html_builder.TITLE('TEST DOCUMENT')
             ), html_builder.BODY(
                 html_builder.H1(html_builder.CLASS('heading-class'), 'TEST HEADING'),
-                html_builder.P(html_builder.CLASS('paragraph'), 'This is a nice text.')
+                html_builder.P(html_builder.CLASS('paragraph'), 'This is a nice text.'),
+                html_builder.UL(
+                    html_builder.LI('TEST ITEM 01'),
+                    html_builder.LI('TEST ITEM 02')
+                )
             )
         )
         # TODO: Invalid HTML
@@ -105,4 +114,28 @@ class TestSelection(unittest.TestCase):
         """When attempting to check a non-boolean expression, a chained ScraperException shall be raised."""
         with self.assertRaises(scraper.ScraperException) as context:
             self.scraper.check('//h1', document=self.valid_html)
+        self.assertIsInstance(context.exception.__cause__, TypeError)
+
+    def test_number(self):
+        """Use an XPath expression that returns a number."""
+        result = self.scraper.number('count(//li)', self.valid_html)
+        self.assertIsInstance(result, float)
+        self.assertEqual(result, 2)
+
+    def test_number_nan(self):
+        """When attempting to get a non-number XPath result, a chained ScraperException shall be raised."""
+        with self.assertRaises(scraper.ScraperException) as context:
+            self.scraper.number('//li', self.valid_html)
+        self.assertIsInstance(context.exception.__cause__, TypeError)
+
+    def test_find_all(self):
+        """Use an XPath expression that returns multiple HTML elements."""
+        result = self.scraper.find_all('//li', self.valid_html)
+        self.assertIsInstance(result, list)
+        self.assertEqual(len(result), 2)
+
+    def test_find_all_no_list(self):
+        """When attempting to get a non-HTML-element-list XPath result, a chained ScraperException shall be raised."""
+        with self.assertRaises(scraper.ScraperException) as context:
+            self.scraper.find_all('count(//li)', self.valid_html)
         self.assertIsInstance(context.exception.__cause__, TypeError)
