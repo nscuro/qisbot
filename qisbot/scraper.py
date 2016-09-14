@@ -2,7 +2,7 @@ import typing
 
 import requests
 from lxml import html
-from lxml.etree import ParserError
+from lxml.etree import ParseError
 from lxml.etree import XPathEvalError, XPathSyntaxError
 
 from qisbot.exceptions import ScraperException
@@ -37,7 +37,7 @@ class Scraper(object):
         try:
             document = html.fromstring(response.content)  # type: html.HtmlElement
             document.make_links_absolute(base_url=url, resolve_base_href=True)
-        except ParserError as err:
+        except ParseError as err:
             raise ScraperException from err
         self._current_status = response.status_code
         self._current_document = document
