@@ -91,7 +91,7 @@ class Scraper(object):
         try:
             result = document.xpath(xpath)
         except (XPathEvalError, XPathSyntaxError) as err:
-            raise ScraperException from err
+            raise ScraperException(xpath) from err
         return result
 
     def check(self, xpath: str, document: html.HtmlElement = None) -> bool:
