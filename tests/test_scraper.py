@@ -3,8 +3,8 @@ from unittest import mock
 
 import requests
 from lxml import html
-from lxml.html import builder as html_builder
 from lxml.etree import ParseError
+from lxml.html import builder as html_builder
 
 from qisbot import scraper
 
@@ -126,6 +126,26 @@ class TestSelection(unittest.TestCase):
         """When attempting to get a non-number XPath result, a chained ScraperException shall be raised."""
         with self.assertRaises(scraper.ScraperException) as context:
             self.scraper.number('//li', self.valid_html)
+        self.assertIsInstance(context.exception.__cause__, TypeError)
+
+    def test_text(self):
+        """Test selection of string values."""
+        result = self.scraper.text('//li/text()', self.valid_html)
+        self.assertIsInstance(result, list)
+        self.assertEqual(len(result), 2)
+        self.assertIn('TEST ITEM 01', result)
+        self.assertIn('TEST ITEM 02', result)
+
+    def test_text_empty(self):
+        """When no text was found, an empty list shall be returned."""
+        result = self.scraper.text('//ul/text()', self.valid_html)
+        self.assertIsInstance(result, list)
+        self.assertEqual(len(result), 0)
+
+    def test_text_no_text(self):
+        """A ScraperException shall be raised when the result is not a list of strings."""
+        with self.assertRaises(scraper.ScraperException) as context:
+            self.scraper.text('//ul/li', self.valid_html)
         self.assertIsInstance(context.exception.__cause__, TypeError)
 
     def test_find_all(self):

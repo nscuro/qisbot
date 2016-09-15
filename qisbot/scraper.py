@@ -2,6 +2,7 @@ import typing
 from contextlib import contextmanager
 
 import requests
+import requests.cookies
 from lxml import html
 from lxml.etree import ParseError
 from lxml.etree import XPathEvalError, XPathSyntaxError
@@ -60,7 +61,7 @@ class Scraper(object):
         return document
 
     def select(self, xpath: str, document: html.HtmlElement = None) -> typing.Union[
-               bool, float, str, typing.List[html.HtmlElement]]:
+        bool, float, str, typing.List[html.HtmlElement]]:
         """Perform a selection on a given HTML document.
 
         As documented in the lxml API documentation, the result of an XPath query
@@ -124,6 +125,28 @@ class Scraper(object):
             raise ScraperException('Result of "{}" is not a number'.format(xpath)) from TypeError
         return result
 
+    def text(self, xpath: str, document: html.HtmlElement = None) -> typing.List[str]:
+        """Execute an XPath expression that returns a (list of) string and validate the result's type.
+
+        Args:
+            xpath:
+            document:
+        Returns:
+            A list of all strings matching the expression. Empty when no match found.
+        Raises:
+            ScraperException: When the result of the expression is not a list of strings
+        """
+        result = self.select(xpath, document)
+        if isinstance(result, list):
+            if not len(result):
+                return []
+            elif not isinstance(result[0], str):
+                # Result has to be a list of strings
+                raise ScraperException from TypeError
+        else:
+            raise ScraperException from TypeError
+        return result
+
     def find_all(self, xpath: str, document: html.HtmlElement = None) -> typing.List[html.HtmlElement]:
         """Execute an XPath expression that returns one or more HtmlElements and validate the result's type.
 
@@ -141,7 +164,7 @@ class Scraper(object):
         return result
 
     def navigate(self, xpaths: typing.List[str], url: str) -> typing.Generator[
-                 typing.Tuple[str, html.HtmlElement], None, typing.Tuple[str, html.HtmlElement]]:
+        typing.Tuple[str, html.HtmlElement], None, typing.Tuple[str, html.HtmlElement]]:
         """Navigate through multiple pages.
 
         Args:
@@ -179,24 +202,24 @@ class Scraper(object):
         return link, document
 
     @property
-    def status(self):
+    def status(self) -> typing.Optional[float]:
         return self._current_status
 
     @property
-    def location(self):
+    def location(self) -> typing.Optional[str]:
         return self._current_location
 
     @property
-    def document(self):
+    def document(self) -> typing.Optional[html.HtmlElement]:
         return self._current_document
 
     @property
-    def cookies(self):
+    def cookies(self) -> requests.cookies.RequestsCookieJar:
         return self.session.cookies
 
     @cookies.deleter
-    def cookies(self):
+    def cookies(self) -> ():
         self.session.cookies.clear()
 
-    def __repr__(self):
-        return '<{}(location={})>'.format(self.__class__, self._current_location)
+    def __repr__(self) -> str:
+        return '<{}(location={}, status={})>'.format(self.__class__, self.location, self.status)
