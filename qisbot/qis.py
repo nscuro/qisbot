@@ -91,6 +91,10 @@ class Qis(object):
         This is accomplished by opening the base_url and looking for options
         to logout. If none is found, the session is considered to be not logged in.
 
+        A handy side-effect is that whenever this check is performed on an already
+        logged-in session, the server-side session timeout is being reset due to activity.
+        This contributes to keeping a session alive longer.
+
         Returns:
             True when logged in, otherwise False
         """
