@@ -14,18 +14,19 @@ class Selectors(enum.Enum):
 
 
 class Qis(object):
-    def __init__(self, base_url: str):
+    def __init__(self, base_url: str, custom_scraper: scraper.Scraper = None):
         """Initialize a new QIS session.
 
         Args:
             base_url: The QIS' base url (usually that of the login page)
+            custom_scraper: A custom scraper instance
         Raises:
             ValueError: When no base url was provided
         """
         if not base_url:
             raise ValueError('No base url provided')
         self._base_url = base_url
-        self._scraper = scraper.Scraper()
+        self._scraper = custom_scraper or scraper.Scraper()
 
     def login(self, username: str, password: str) -> ():
         """Perform a login.
