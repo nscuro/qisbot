@@ -14,10 +14,12 @@ class QisLoginFailedException(IOError):
 
 
 class QisNotLoggedInException(BaseException):
-    """ """
+    """Raised when trying to perform an action that requires a login without
+    being logged in.
+    """
     pass
 
 
 class UnexpectedStateException(BaseException):
-    """ """
+    """Raised when trying to perform an action which prerequisite is not satisfied."""
     pass
