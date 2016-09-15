@@ -4,6 +4,7 @@ import requests
 from lxml import html
 from lxml.etree import strip_tags
 
+from qisbot import models
 from qisbot import scraper
 from qisbot.selectors import Selectors
 from qisbot.exceptions import NoSuchElementException
@@ -136,5 +137,27 @@ class Qis(object):
         return self._scraper.find_all('.//tr', document=exam_data_table[0])
 
     @property
+    def exams_extract(self) -> typing.List[models.Exam]:
+        """Get an exams extract.
+
+        Note that this will call fetch_exams_extract every time.
+
+        Returns:
+            A list of Exam instances. See models.map_exam for how
+            the result of fetch_exams_extract is mapped.
+        """
+        extract_rows = self.fetch_exams_extract()
+        extract = []
+        for row in extract_rows:
+            exam = models.map_exam(row)
+            if not exam:
+                continue
+            extract.append(exam)
+        return extract
+
+    @property
     def base_url(self) -> str:
         return self._base_url
+
+    def __repr__(self) -> str:
+        return '{} (base_url={})'.format(self.__class__, self.base_url)
