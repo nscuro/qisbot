@@ -49,7 +49,7 @@ class Qis(object):
             username: The username (the student's e-mail)
             password: The password
         Raises:
-            ValueError: When either username or password are missing
+            ValueError: When either username or password are missing or the login action was not found
             NoSuchElementException: When unable to locate elements on login form
             QisLoginFailedException: When the login failed
         """
@@ -63,6 +63,8 @@ class Qis(object):
         # Determine where to post the login request to
         login_form = base_doc.forms[0]  # type: html.FormElement
         login_action = login_form.action
+        if login_action is None:
+            raise ValueError('No login action found')
         # The submit button has a name & value, thus has to be posted too
         login_submit_value = None  # type: str
         for form_field in login_form.fields.keys():
