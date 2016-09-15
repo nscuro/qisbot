@@ -8,6 +8,7 @@ from lxml.etree import ParseError
 from lxml.etree import XPathEvalError, XPathSyntaxError
 
 from qisbot.exceptions import ScraperException
+from qisbot.exceptions import NoSuchElementException
 
 
 class Scraper(object):
@@ -163,9 +164,11 @@ class Scraper(object):
             raise ScraperException('Result of "{}" is not a list of HtmlElements'.format(xpath)) from TypeError
         return result
 
-    def navigate(self, xpaths: typing.List[str], url: str) -> typing.Generator[
-        typing.Tuple[str, html.HtmlElement], None, typing.Tuple[str, html.HtmlElement]]:
+    def navigate(self, xpaths: typing.List[str], url: str) -> typing.Iterable[typing.Tuple[str, html.HtmlElement]]:
         """Navigate through multiple pages.
+
+        Note that when a given XPath expression returns multiple elements / strings, this method
+        will only consider the first element of that list.
 
         Args:
             xpaths: List of XPath expressions pointing to links or link-containing elements
@@ -188,13 +191,32 @@ class Scraper(object):
         for xpath in xpaths:
             selection = self.select(xpath, document)
             if isinstance(selection, str):
+                # Selection is string (most likely an URL)
                 link = selection
             elif isinstance(selection, html.HtmlElement):
+                # Selection is an HTML element that SHOULD contain a href attribute
                 try:
                     link = selection.get('href')
                 except KeyError as err:
                     raise ScraperException from err
+            elif isinstance(selection, list):
+                # Selection is a list of something
+                if not len(selection):
+                    raise NoSuchElementException(xpath)
+                elem = selection[0]
+                if isinstance(elem, str):
+                    link = elem
+                elif isinstance(elem, html.HtmlElement):
+                    try:
+                        link = elem.get('href')
+                    except KeyError as err:
+                        raise ScraperException from err
+                else:
+                    # Every other type cannot be used for navigation
+                    raise ScraperException('Cannot perform navigation with result of type {} from XPath "{}"'
+                                           .format(type(selection), xpath))
             else:
+                # Every other type cannot be used for navigation
                 raise ScraperException('Cannot perform navigation with result of type {} from XPath "{}"'
                                        .format(type(selection), xpath))
             document = self.fetch(link)
