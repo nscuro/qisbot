@@ -11,3 +11,13 @@ class NoSuchElementException(LookupError):
 class QisLoginFailedException(IOError):
     """Raised when logging in to the QIS system failed."""
     pass
+
+
+class QisNotLoggedInException(BaseException):
+    """ """
+    pass
+
+
+class UnexpectedStateException(BaseException):
+    """ """
+    pass

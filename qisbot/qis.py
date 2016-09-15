@@ -1,4 +1,5 @@
 import enum
+import typing
 
 import requests
 from lxml import html
@@ -7,10 +8,33 @@ from lxml.etree import strip_tags
 from qisbot import scraper
 from qisbot.exceptions import NoSuchElementException
 from qisbot.exceptions import QisLoginFailedException
+from qisbot.exceptions import QisNotLoggedInException
+from qisbot.exceptions import UnexpectedStateException
 
 
 class Selectors(enum.Enum):
+    """Holds all non-trivial XPath expressions."""
     LOGIN_ACTION_LINK = '//*[@id="wrapper"]/div[3]/a[2]'
+    EXAM_ADMINISTRATION_LINK = '//a[text() = "Prüfungsverwaltung" or text() = "Administration of exams"]'
+    EXAMS_EXTRACT_LINK = '//a[text() = "Notenspiegel" or text() = "Exams Extract"]'
+    SHOW_ACCOMPLISHMENTS_LINK = '//a[@title = "Leistungen anzeigen"]'
+    EXAMS_EXTRACT_EXAMS_TABLE = '//form/table[2]'
+    EXAMS_EXTRACT_EXAMS_CELLS = './/*[@class = "tabelle1_alignleft" or @class = "tabelle1_aligncenter ' \
+                                'or @class = "tabelle1_alignright"]'
+
+
+def requires_login(func):
+    """Checks whether or not the current session is logged in before executing a function."""
+
+    def wrapper(*args):
+        if not isinstance(args[0], Qis):
+            raise ValueError('@requires_login requires a self-reference to a Qis instance')
+        qis_instance = args[0]  # type: Qis
+        if not qis_instance.is_logged_in:
+            raise QisNotLoggedInException('This action requires a login')
+        return func(*args)
+
+    return wrapper
 
 
 class Qis(object):
@@ -94,6 +118,33 @@ class Qis(object):
         if login_status in ('logout', 'abmelden'):
             return True
         return False
+
+    @requires_login
+    def fetch_exams_extract(self) -> typing.List[html.HtmlElement]:
+        """Fetch all rows of the exams extract.
+
+        This does not perform any filtering actions.
+
+        Returns:
+            A list of all rows containing exam information
+        Raises:
+            QisNotLoggedInException: When session is not logged in
+            UnexpectedStateException: When navigating to exams extract page failed
+            NoSuchElementException: When unable to locate exams extract data table
+        """
+        ee_doc = None  # type: html.HtmlElement
+        for _, ee_doc in self._scraper.navigate([Selectors.EXAM_ADMINISTRATION_LINK.value,
+                                                 Selectors.EXAMS_EXTRACT_LINK.value,
+                                                 Selectors.SHOW_ACCOMPLISHMENTS_LINK.value],
+                                                self._base_url):
+            pass
+        if not self._scraper.number('count(//div[@class = "abstand_pruefinfo"])', document=ee_doc):
+            raise UnexpectedStateException('This may be something, but it\'s definitely NOT the exams extract page.')
+        # Get the table that contains all the exam data
+        exam_data_table = self._scraper.find_all(Selectors.EXAMS_EXTRACT_EXAMS_TABLE.value, document=ee_doc)
+        if not len(exam_data_table):
+            raise NoSuchElementException('Unable to find table containing exams data')
+        return self._scraper.find_all('.//tr', document=exam_data_table[0])
 
     @property
     def base_url(self) -> str:
