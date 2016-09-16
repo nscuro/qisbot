@@ -48,7 +48,7 @@ class ExamData(enum.Enum):
         return self.value[0]
 
     @property
-    def type(self) -> str:
+    def type(self) -> typing.Any:
         return self.value[1]
 
 
