@@ -1,4 +1,5 @@
 import typing
+import functools
 
 import requests
 from lxml import html
@@ -16,15 +17,16 @@ from qisbot.exceptions import UnexpectedStateException
 def requires_login(func):
     """Checks whether or not the current session is logged in before executing a function."""
 
-    def wrapper(*args):
+    @functools.wraps(func)
+    def check_login(*args, **kwargs):
         if not isinstance(args[0], Qis):
-            raise ValueError('@requires_login requires a self-reference to a Qis instance')
+            raise ValueError('@requires_login only works for Qis instances')
         qis_instance = args[0]  # type: Qis
         if not qis_instance.is_logged_in:
             raise QisNotLoggedInException('This action requires a login')
-        return func(*args)
+        return func(*args, **kwargs)
 
-    return wrapper
+    return check_login
 
 
 class Qis(object):
