@@ -29,26 +29,26 @@ class ExamStatus(enum.Enum):
 class ExamData(enum.Enum):
     """Defines the data (keys) an Exam instance can hold."""
 
-    ID = (0, int)
-    NAME = (1, str)
-    SPECIAL = (2, str)
-    RULING = (3, int)
-    ATTEMPT = (4, int)
-    NULLIFY = (5, str)
-    SEMESTER = (6, str)
-    DATE = (7, str)
-    GRADE = (8, float)
-    POINTS = (9, str)
-    ECTS = (10, float)
-    STATUS = (11, ExamStatus)
-    RECOGNIZED = (12, str)
+    id = (0, int)
+    name = (1, str)
+    special = (2, str)
+    ruling = (3, int)
+    attempt = (4, int)
+    nullify = (5, str)
+    semester = (6, str)
+    date = (7, str)
+    grade = (8, float)
+    points = (9, str)
+    ects = (10, float)
+    status = (11, ExamStatus)
+    recognized = (12, str)
 
     @property
     def index(self) -> int:
         return self.value[0]
 
     @property
-    def type(self) -> typing.Any:
+    def type(self) -> str:
         return self.value[1]
 
 
@@ -118,5 +118,5 @@ def map_exam(table_row: html.HtmlElement) -> typing.Optional[Exam]:
                 cell_text, type(cell_text), member.type
             )) from err
         else:
-            setattr(exam, name.lower(), cell_value)
+            setattr(exam, name, cell_value)
     return exam
