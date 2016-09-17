@@ -17,7 +17,7 @@ class DatabaseManager(object):
             raise ValueError('database_path must not be None or empty')
         self._connection = sqlite3.connect(database_path)
         for schema in self.schemas:
-            self._connection.execute(schema)
+            self.execute(schema)
 
     def execute(self, query: str) -> sqlite3.Cursor:
         self._connection.execute(query)
@@ -25,7 +25,7 @@ class DatabaseManager(object):
     @property
     def schemas(self) -> typing.List[str]:
         """A list of all schemas as SQL create statements."""
-        return list(self._build_schema('exams', self._map_exam_types()))
+        return [self._build_schema('exams', self._map_exam_types())]
 
     @staticmethod
     def _build_schema(table_name: str, type_generator: typing.Iterable) -> str:
