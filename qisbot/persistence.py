@@ -1,7 +1,8 @@
 import sqlite3
 import typing
 
-from qisbot.models import ExamData
+from qisbot import models
+from qisbot.exceptions import PersistenceException
 
 
 class DatabaseManager(object):
@@ -19,8 +20,45 @@ class DatabaseManager(object):
         for schema in self.schemas:
             self.execute(schema)
 
-    def execute(self, query: str) -> sqlite3.Cursor:
-        self._connection.execute(query)
+    def execute(self, statement: str, params: typing.Iterable = ()) -> sqlite3.Cursor:
+        """Execute a given SQL statement.
+
+        Args:
+            statement: The SQL statement to execute
+            params: The parameters for the statement
+        Returns:
+            The cursor for the result
+        """
+        self._connection.execute(statement, params)
+
+    def commit(self) -> ():
+        """Commits the last actions performed on the database."""
+        self._connection.commit()
+
+    def insert_exam(self, exam: models.Exam) -> sqlite3.Cursor:
+        """Insert a given Exam instance into the database.
+
+        Args:
+            exam: The Exam to insert
+        Returns:
+            The cursor for the result
+        Raises:
+            PersistenceException: When there is already an exam with the same ID
+        """
+        statement = 'INSERT INTO exams VALUES ('
+        parameters = []
+        for name, _ in self._map_exam_types():
+            statement += '?, '
+            param = getattr(exam, name)
+            if isinstance(param, models.ExamStatus):
+                param = param.name
+            parameters.append(param)
+        statement = statement[:statement.rfind(', ')] + ')'
+        try:
+            result = self.execute(statement, parameters)
+        except sqlite3.IntegrityError as err:
+            raise PersistenceException('Failed to insert exam') from err
+        return result
 
     @property
     def schemas(self) -> typing.List[str]:
@@ -51,7 +89,7 @@ class DatabaseManager(object):
         Yields:
             The name and SQL domain of a member
         """
-        for name, member in ExamData.__members__.items():
+        for name, member in models.ExamData.__members__.items():
             if member.type is int:
                 domain = 'INTEGER'
                 if name == 'id':

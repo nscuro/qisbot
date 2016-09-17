@@ -39,3 +39,10 @@ class Bot(object):
         self.db_manager = persistence.DatabaseManager(database_path)
         self.scraper = scraper.Scraper()
         self.qis = qis.Qis(base_url=self.config.base_url, custom_scraper=self.scraper)
+
+    @ensure_login
+    def refresh_exams_extract(self):
+        exams_extract = self.qis.exams_extract
+        for exam in exams_extract:
+            # TODO Compare before inserting
+            self.db_manager.insert_exam(exam)

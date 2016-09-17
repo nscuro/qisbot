@@ -23,3 +23,7 @@ class QisNotLoggedInException(BaseException):
 class UnexpectedStateException(BaseException):
     """Raised when trying to perform an action which prerequisite is not satisfied."""
     pass
+
+
+class PersistenceException(IOError):
+    pass
