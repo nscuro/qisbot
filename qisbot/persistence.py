@@ -56,7 +56,23 @@ class DatabaseManager(object):
         except sqlite3.IntegrityError as err:
             raise PersistenceException('Exam with id {} was already persisted'.format(exam.id)) from err
 
-    def fetch_exam(self, exam_id: int) -> typing.Optional[models.Exam]:
+    def update_exam(self, exam_id: str, changes: typing.Dict[str, str]) -> ():
+        """Update a given exam record.
+
+        Args:
+            exam_id: ID of the exam to update
+            changes: Changes to apply
+        """
+        statement = 'UPDATE exams SET '
+        parameters = []
+        for attr_name, new_value in changes.items():
+            statement += '{}=?, '.format(attr_name)
+            parameters.append(new_value)
+        statement = statement[:statement.rfind(', ')] + ' WHERE id = ?'
+        parameters.append(exam_id)
+        self.execute(statement, params=parameters)
+
+    def fetch_exam(self, exam_id: str) -> typing.Optional[models.Exam]:
         """Fetch an Exam with a given ID from the database.
 
         Args:
@@ -65,7 +81,7 @@ class DatabaseManager(object):
             The resulting Exam instance or None
         """
         statement = 'SELECT * FROM exams WHERE exams.id = ?'
-        result = self.execute(statement, params=(exam_id,)).fetchone()
+        result = self.execute(statement, params=(int(exam_id),)).fetchone()
         if not result:
             return None
         return models.map_to_exam(result)
