@@ -24,7 +24,7 @@ class ExamData(enum.Enum):
 
 class Exam(object):
     def __init__(self):
-        self.id = None  # type: int
+        self.id = None  # type: str
         self.name = None  # type: str
         self.special = None  # type: str
         self.ruling = None  # type: str
