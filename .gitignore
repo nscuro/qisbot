@@ -91,3 +91,7 @@ ENV/
 # PyCharm
 *.iml
 .idea/
+
+# qisbot config & database
+qisbot.ini
+qisbot.db
