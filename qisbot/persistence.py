@@ -70,6 +70,20 @@ class DatabaseManager(object):
             return None
         return models.map_to_exam(result)
 
+    def fetch_all_exams(self) -> typing.List[models.Exam]:
+        """Fetch all exams from the database.
+
+        Returns:
+            A list of all persisted exams.
+        """
+        result = self.execute('SELECT * FROM exams').fetchall()
+        if not result:
+            return []
+        exams = []
+        for result_item in result:
+            exams.append(models.map_to_exam(result_item))
+        return exams
+
     @property
     def schemas(self) -> typing.Dict[str, str]:
         """A dict of all table names and schemas as SQL create statements."""
