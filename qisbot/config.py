@@ -28,17 +28,17 @@ class QisConfiguration(object):
         return self.parser.get('QIS', 'password')
 
     @property
-    def notify_on_new(self):
+    def notify_on_new(self) -> bool:
         return self.parser.getboolean('NOTIFICATIONS', 'on_new', fallback=False)
 
     @property
-    def notify_on_changed(self):
+    def notify_on_changed(self) -> bool:
         return self.parser.getboolean('NOTIFICATIONS', 'on_changed', fallback=False)
 
     @property
-    def notify_stdout(self):
+    def notify_stdout(self) -> bool:
         return self.parser.getboolean('NOTIFICATIONS', 'stdout', fallback=False)
 
     @property
-    def notify_email(self):
+    def notify_email(self) -> bool:
         return self.parser.getboolean('NOTIFICATIONS', 'email', fallback=False)
