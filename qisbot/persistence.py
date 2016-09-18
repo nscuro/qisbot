@@ -29,7 +29,7 @@ class DatabaseManager(object):
         Returns:
             The cursor for the result
         """
-        self._connection.execute(statement, params)
+        return self._connection.execute(statement, params)
 
     def commit(self) -> ():
         """Commits the last actions performed on the database."""
