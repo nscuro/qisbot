@@ -41,6 +41,16 @@ class Bot(object):
         self.qis = qis.Qis(base_url=self.config.base_url, custom_scraper=self.scraper)
 
     @ensure_login
-    def refresh_exams_extract(self):
+    def refresh_exams_extract(self) -> ():
+        """Fetch the exams extract from remote and persist it.
+
+        TODO: Detect changes and notify the user.
+        """
         exams_extract = self.qis.exams_extract
-        # TODO
+        for exam in exams_extract:
+            persisted_exam = self.db_manager.fetch_exam(exam.id)
+            if persisted_exam:
+                # TODO: Detect changes
+                pass
+            else:
+                self.db_manager.persist_exam(exam)
