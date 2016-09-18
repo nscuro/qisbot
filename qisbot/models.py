@@ -23,6 +23,21 @@ class ExamData(enum.Enum):
 
 
 class Exam(object):
+    def __init__(self):
+        self.id = None  # type: int
+        self.name = None  # type: str
+        self.special = None  # type: str
+        self.ruling = None  # type: str
+        self.attempt = None  # type: str
+        self.nullify = None  # type: str
+        self.semester = None  # type: str
+        self.date = None  # type: str
+        self.grade = None  # type: str
+        self.points = None  # type: str
+        self.ects = None  # type: str
+        self.status = None  # type: str
+        self.recognized = None  # type: str
+
     @property
     def attributes(self) -> typing.Dict[str, typing.Any]:
         """Get a dictionary of all attributes.
