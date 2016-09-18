@@ -40,9 +40,9 @@ class Bot(object):
         elif not database_path:
             raise ValueError('database_path must not be None or empty')
         self.config = config.QisConfiguration(config_path)
-        self.db_manager = persistence.DatabaseManager(database_path)
-        self.scraper = scraper.Scraper()
-        self.qis = qis.Qis(base_url=self.config.base_url, custom_scraper=self.scraper)
+        self._db_manager = persistence.DatabaseManager(database_path)
+        self._scraper = scraper.Scraper()
+        self.qis = qis.Qis(base_url=self.config.base_url, custom_scraper=self._scraper)
         self._register_event_subscribers()
 
     def _register_event_subscribers(self):
@@ -67,7 +67,7 @@ class Bot(object):
         """
         exams_extract = self.qis.exams_extract
         for exam in exams_extract:
-            persisted_exam = self.db_manager.fetch_exam(exam.id)
+            persisted_exam = self._db_manager.fetch_exam(exam.id)
             if persisted_exam:
                 changes = models.compare_exams(old=persisted_exam, new=exam)
                 if len(changes):
@@ -76,8 +76,8 @@ class Bot(object):
                     update_changes = {}
                     for changed_field, values in changes.items():
                         update_changes[changed_field] = values[1]
-                    self.db_manager.update_exam(exam.id, update_changes)
-                    self.db_manager.commit()
+                    self._db_manager.update_exam(exam.id, update_changes)
+                    self._db_manager.commit()
             else:
-                self.db_manager.persist_exam(exam)
+                self._db_manager.persist_exam(exam)
                 zope.event.notify(events.NewExamEvent(exam))
