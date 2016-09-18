@@ -29,51 +29,6 @@ def requires_login(func):
     return check_login
 
 
-def map_to_exam(source: typing.Union[html.HtmlElement, typing.Tuple[str]]) -> models.Exam:
-    """Map a given source to an equivalent Exam instance.
-
-    Args:
-        source: The source to map from
-    Returns:
-        The resulting Exam instance
-    Raises:
-        ValueError: When the source's columns / entries don't match the format defined
-            in models.ExamData
-        TypeError: When source has an unsupported type
-    """
-
-    def map_from_html(table_row: html.HtmlElement) -> models.Exam:
-        row_cells = table_row.xpath('.//td')
-        if len(row_cells) != len(models.ExamData.__members__):
-            raise ValueError('Unexpected amount of cells (Expected {}, got {})'.format(len(models.ExamData.__members__),
-                                                                                       len(row_cells)))
-        exam = models.Exam()
-        for name, member in models.ExamData.__members__.items():
-            current_cell = row_cells[member.value]
-            if current_cell.text == '&nbsp':
-                attribute_value = None
-            else:
-                attribute_value = current_cell.text_content().strip()
-            setattr(exam, name, attribute_value)
-        return exam
-
-    def map_from_sql(query_result: typing.Tuple) -> models.Exam:
-        if len(query_result) != len(models.ExamData.__members__):
-            raise ValueError('Unexpected amount of colums (Expected {}, got {})'.format(len(query_result), len(
-                models.ExamData.__members__)))
-        exam = models.Exam()
-        for name, member in models.ExamData.__members__.items():
-            setattr(exam, name, query_result[member.value])
-        return exam
-
-    if isinstance(source, html.HtmlElement):
-        return map_from_html(source)
-    elif isinstance(source, typing.Tuple[str]):
-        return map_from_sql(source)
-    else:
-        raise TypeError('Cannot map Exam from type {}'.format(str(type(source))))
-
-
 class Qis(object):
     def __init__(self, base_url: str, custom_scraper: scraper.Scraper = None):
         """Initialize a new QIS session.
@@ -203,7 +158,7 @@ class Qis(object):
         extract = []
         for row in extract_rows:
             try:
-                exam = map_to_exam(source=row)
+                exam = models.map_to_exam(source=row)
             except ValueError:
                 # That row was not relevant
                 continue
