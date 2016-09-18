@@ -81,7 +81,7 @@ def map_to_exam(source: typing.Union[html.HtmlElement, typing.Tuple[str]]) -> Ex
                 attribute_value = None
             else:
                 attribute_value = current_cell.text_content().strip()
-            setattr(exam, name, attribute_value)
+            setattr(exam, name, str(attribute_value))
         return exam
 
     def map_from_sql(query_result: typing.Tuple[str]) -> Exam:
@@ -99,3 +99,21 @@ def map_to_exam(source: typing.Union[html.HtmlElement, typing.Tuple[str]]) -> Ex
         return map_from_sql(source)
     else:
         raise TypeError('Cannot map Exam from type {}'.format(str(type(source))))
+
+
+def compare_exams(old: Exam, new: Exam) -> typing.Dict[str, typing.Tuple[str, str]]:
+    """Compare two Exam instances.
+
+    Args:
+        old: Exam instance containing "old" data
+        new: Exam instance containing "new" data
+    Returns:
+        A dict containing all changes
+    """
+    changes = {}
+    for attr_name in ExamData.__members__.keys():
+        old_val = getattr(old, attr_name)
+        new_val = getattr(new, attr_name)
+        if new_val != old_val:
+            changes[attr_name] = (old_val, new_val)
+    return changes
