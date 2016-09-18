@@ -90,7 +90,7 @@ def map_to_exam(source: typing.Union[html.HtmlElement, typing.Tuple[str]]) -> Ex
                                                                                         len(ExamData.__members__)))
         exam = Exam()
         for name, member in ExamData.__members__.items():
-            setattr(exam, name, query_result[member.value])
+            setattr(exam, name, str(query_result[member.value]))
         return exam
 
     if isinstance(source, html.HtmlElement):
