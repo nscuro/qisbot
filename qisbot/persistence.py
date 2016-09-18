@@ -41,7 +41,7 @@ class DatabaseManager(object):
         return [self._build_schema('exams', models.ExamData)]
 
     @staticmethod
-    def _build_schema(table_name: str, data_model: enum.Enum) -> str:
+    def _build_schema(table_name: str, data_model: enum.EnumMeta) -> str:
         """Build a table schema.
 
         Args:
