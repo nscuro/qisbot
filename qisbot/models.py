@@ -53,7 +53,7 @@ class Exam(object):
         return attrs
 
     def __repr__(self):
-        return '{} ({})'.format(self.__class__, self.attributes)
+        return '<{} ({})>'.format(self.__class__.__name__, self.attributes)
 
 
 def map_to_exam(source: typing.Union[html.HtmlElement, typing.Tuple[str]]) -> Exam:
@@ -84,7 +84,7 @@ def map_to_exam(source: typing.Union[html.HtmlElement, typing.Tuple[str]]) -> Ex
             setattr(exam, name, attribute_value)
         return exam
 
-    def map_from_sql(query_result: typing.Tuple) -> Exam:
+    def map_from_sql(query_result: typing.Tuple[str]) -> Exam:
         if len(query_result) != len(ExamData.__members__):
             raise ValueError('Unexpected amount of colums (Expected {}, got {})'.format(len(query_result),
                                                                                         len(ExamData.__members__)))
@@ -95,7 +95,7 @@ def map_to_exam(source: typing.Union[html.HtmlElement, typing.Tuple[str]]) -> Ex
 
     if isinstance(source, html.HtmlElement):
         return map_from_html(source)
-    elif isinstance(source, typing.Tuple[str]):
+    elif isinstance(source, (tuple, list)):
         return map_from_sql(source)
     else:
         raise TypeError('Cannot map Exam from type {}'.format(str(type(source))))
