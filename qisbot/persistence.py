@@ -3,6 +3,7 @@ import sqlite3
 import typing
 
 from qisbot import models
+from qisbot.exceptions import PersistenceException
 
 
 class DatabaseManager(object):
@@ -34,6 +35,42 @@ class DatabaseManager(object):
     def commit(self) -> ():
         """Commits the last actions performed on the database."""
         self._connection.commit()
+
+    def persist_exam(self, exam: models.Exam) -> ():
+        """Insert a given Exam instance into the database.
+
+        Args:
+            exam: The Exam to persist
+        Raises:
+            PersistenceException: When the given exam already exists in the database
+        """
+        statement = 'INSERT INTO exams VALUES ('
+        parameters = []
+        for attr_name in models.ExamData.__members__.keys():
+            statement += '?, '
+            parameters.append(exam.attributes.get(attr_name))
+        statement = statement[:statement.rfind(', ')] + ')'
+        try:
+            self.execute(statement, params=parameters)
+            self.commit()
+        except sqlite3.IntegrityError as err:
+            raise PersistenceException('Exam with id {} was already persisted'.format(exam.id)) from err
+
+    def fetch_exam(self, exam_id: int) -> models.Exam:
+        """Fetch an Exam with a given ID from the database.
+
+        Args:
+            exam_id: ID of the requested Exam
+        Returns:
+            The resulting Exam instance
+        Raises:
+            PersistenceException: When there's no Exam with the given ID
+        """
+        statement = 'SELECT * FROM exams WHERE exams.id = ?'
+        result = self.execute(statement, params=(exam_id,)).fetchone()
+        if not result:
+            raise PersistenceException('No Exam with id {} found'.format(exam_id))
+        return models.map_to_exam(result)
 
     @property
     def schemas(self) -> typing.Dict[str, str]:
