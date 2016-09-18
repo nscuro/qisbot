@@ -17,7 +17,7 @@ class DatabaseManager(object):
         if not database_path:
             raise ValueError('database_path must not be None or empty')
         self._connection = sqlite3.connect(database_path)
-        for schema in self.schemas:
+        for name, schema in self.schemas.items():
             self.execute(schema)
 
     def execute(self, statement: str, params: typing.Iterable = ()) -> sqlite3.Cursor:
@@ -36,9 +36,10 @@ class DatabaseManager(object):
         self._connection.commit()
 
     @property
-    def schemas(self) -> typing.List[str]:
+    def schemas(self) -> typing.Dict[str, str]:
         """A list of all schemas as SQL create statements."""
-        return [self._build_schema('exams', models.ExamData)]
+        exams_schema = self._build_schema('exams', models.ExamData)
+        return {exams_schema[0]: exams_schema[1]}
 
     @staticmethod
     def _build_schema(table_name: str, data_model: enum.EnumMeta) -> str:
@@ -59,7 +60,7 @@ class DatabaseManager(object):
             schema += '{} {}, '.format(name, domain)
         last_separator_index = schema.rfind(', ')
         schema = schema[:last_separator_index] + ')'
-        return schema
+        return table_name, schema
 
     def __del__(self) -> ():
         """Close the database connection when instance gets garbage collected."""
