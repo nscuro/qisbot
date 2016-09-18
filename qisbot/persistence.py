@@ -37,7 +37,7 @@ class DatabaseManager(object):
 
     @property
     def schemas(self) -> typing.Dict[str, str]:
-        """A list of all schemas as SQL create statements."""
+        """A dict of all table names and schemas as SQL create statements."""
         exams_schema = self._build_schema('exams', models.ExamData)
         return {exams_schema[0]: exams_schema[1]}
 
@@ -49,7 +49,7 @@ class DatabaseManager(object):
             table_name: Name of the table
             data_model: Model to build the schema for
         Returns:
-            The schema as SQL create statement
+            The table name and schema as SQL create statement
         """
         schema = 'CREATE TABLE IF NOT EXISTS {} ('.format(table_name)
         for name, field in data_model.__members__.items():
