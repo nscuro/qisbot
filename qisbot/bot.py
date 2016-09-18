@@ -1,5 +1,6 @@
 import functools
 
+import tablib
 import zope.event
 
 from qisbot import config
@@ -81,3 +82,31 @@ class Bot(object):
             else:
                 self._db_manager.persist_exam(exam)
                 zope.event.notify(events.NewExamEvent(exam))
+
+    def exams_extract_dataset(self, force_refresh=False) -> tablib.Dataset:
+        """Get the exams extract as tabular dataset.
+
+        Args:
+            force_refresh: Refresh exams extract before processing it
+        Returns:
+            The resulting dataset
+        """
+        if force_refresh:
+            self.refresh_exams_extract()
+        exams_extract = self._db_manager.fetch_all_exams()
+        dataset = tablib.Dataset()
+        dataset.headers = [attr_name for attr_name in models.ExamData.__members__.keys()]
+        for exam in exams_extract:
+            row = []
+            for attr_name in models.ExamData.__members__.keys():
+                row.append(getattr(exam, attr_name))
+            dataset.append(row)
+        return dataset
+
+    def print_exams_extract(self, force_refresh=False) -> ():
+        """Print the exams extract as table to stdout.
+
+        Args:
+            force_refresh: Refresh exams extract before printing
+        """
+        print(self.exams_extract_dataset(force_refresh=force_refresh))

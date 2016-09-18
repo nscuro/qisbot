@@ -1,4 +1,5 @@
 lxml>=3.6.0
 requests>=2.10.0
 zope.event>=4.2.0
+tablib>=0.11.2
 typing>=3.5.2; python_version < '3.5'
