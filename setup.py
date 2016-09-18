@@ -9,4 +9,5 @@ setup(
     url='https://github.com/scuroworks/qisbot',
     license='GPLv3',
     packages=['qisbot'],
+    scripts=['runqisbot']
 )
