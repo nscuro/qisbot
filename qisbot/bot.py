@@ -72,7 +72,12 @@ class Bot(object):
                 changes = models.compare_exams(old=persisted_exam, new=exam)
                 if len(changes):
                     zope.event.notify(events.ExamChangedEvent(old_exam=persisted_exam, new_exam=exam, changes=changes))
-                # TODO: Update persisted data
+                    # Persist the changes
+                    update_changes = {}
+                    for changed_field, values in changes.items():
+                        update_changes[changed_field] = values[1]
+                    self.db_manager.update_exam(exam.id, update_changes)
+                    self.db_manager.commit()
             else:
                 self.db_manager.persist_exam(exam)
                 zope.event.notify(events.NewExamEvent(exam))
