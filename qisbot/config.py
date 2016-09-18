@@ -26,3 +26,19 @@ class QisConfiguration(object):
     @property
     def password(self) -> typing.Optional[str]:
         return self.parser.get('QIS', 'password')
+
+    @property
+    def notify_on_new(self):
+        return self.parser.getboolean('NOTIFICATIONS', 'on_new', fallback=False)
+
+    @property
+    def notify_on_changed(self):
+        return self.parser.getboolean('NOTIFICATIONS', 'on_changed', fallback=False)
+
+    @property
+    def notify_stdout(self):
+        return self.parser.getboolean('NOTIFICATIONS', 'stdout', fallback=False)
+
+    @property
+    def notify_email(self):
+        return self.parser.getboolean('NOTIFICATIONS', 'email', fallback=False)

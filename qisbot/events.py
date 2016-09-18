@@ -1,7 +1,5 @@
 import functools
 
-import zope.event
-
 from qisbot import models
 
 
@@ -57,8 +55,3 @@ def on_exam_changed_stdout(event: ExamChangedEvent) -> ():
 def on_exam_changed_email(event: ExamChangedEvent) -> ():
     """Subscriber to ExamChangedEvent that notifies the user via E-Mail."""
     pass
-
-
-# Register all default subscribers
-zope.event.subscribers.append(on_new_exam_stdout)
-zope.event.subscribers.append(on_exam_changed_stdout)
