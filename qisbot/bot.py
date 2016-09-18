@@ -7,6 +7,7 @@ from qisbot import persistence
 from qisbot import qis
 from qisbot import scraper
 from qisbot import events
+from qisbot import models
 
 
 def ensure_login(func):
@@ -59,15 +60,19 @@ class Bot(object):
 
     @ensure_login
     def refresh_exams_extract(self) -> ():
-        """Fetch the exams extract from remote and persist it.
+        """Fetch the exams extract from remote.
 
-        TODO: Detect changes and notify the user.
+        New exams will be persisted, existing ones will be compared with their
+        already-fetched equivalents and changes will be detected.
         """
         exams_extract = self.qis.exams_extract
         for exam in exams_extract:
             persisted_exam = self.db_manager.fetch_exam(exam.id)
             if persisted_exam:
-                # TODO: Detect changes
-                pass
+                changes = models.compare_exams(old=persisted_exam, new=exam)
+                if len(changes):
+                    zope.event.notify(events.ExamChangedEvent(old_exam=persisted_exam, new_exam=exam, changes=changes))
+                # TODO: Update persisted data
             else:
                 self.db_manager.persist_exam(exam)
+                zope.event.notify(events.NewExamEvent(exam))
