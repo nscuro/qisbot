@@ -41,7 +41,7 @@ class Exam(object):
         return '{} ({})'.format(self.__class__, self.attributes)
 
 
-def map_to_exam(source: typing.Union[html.HtmlElement, typing.Tuple[str]]) -> models.Exam:
+def map_to_exam(source: typing.Union[html.HtmlElement, typing.Tuple[str]]) -> Exam:
     """Map a given source to an equivalent Exam instance.
 
     Args:
