@@ -11,11 +11,11 @@ def ensure_login(func):
 
     @functools.wraps(func)
     def login(*args, **kwargs):
-        self = args[0]  # type: Bot
-        if not isinstance(self, Bot):
+        bot = args[0]  # type: Bot
+        if not isinstance(bot, Bot):
             raise TypeError('@ensure_login only works for Bot instances')
-        if not self.qis.is_logged_in:
-            self.qis.login(self.config.username, self.config.password)
+        if not bot.qis.is_logged_in:
+            bot.qis.login(bot.config.username, bot.config.password)
         return func(*args, **kwargs)
 
     return login
@@ -43,6 +43,4 @@ class Bot(object):
     @ensure_login
     def refresh_exams_extract(self):
         exams_extract = self.qis.exams_extract
-        for exam in exams_extract:
-            # TODO Compare before inserting
-            self.db_manager.insert_exam(exam)
+        # TODO
