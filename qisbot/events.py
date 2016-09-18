@@ -45,6 +45,12 @@ def on_new_exam_stdout(event: NewExamEvent) -> ():
     pass
 
 
+@subscriber_of(NewExamEvent)
+def on_new_exam_email(event: NewExamEvent) -> ():
+    """Subscriber to NewExamEvent that notifies the user via E-Mail."""
+    pass
+
+
 @subscriber_of(ExamChangedEvent)
 def on_exam_changed_stdout(event: ExamChangedEvent) -> ():
     """Subscriber of ExamChangedEvent that prints to stdout."""
