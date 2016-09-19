@@ -83,11 +83,12 @@ class Bot(object):
                 self._db_manager.persist_exam(exam)
                 zope.event.notify(events.NewExamEvent(exam))
 
-    def exams_extract_dataset(self, force_refresh=False) -> tablib.Dataset:
+    def exams_extract_dataset(self, force_refresh=False, omit_empty=False) -> tablib.Dataset:
         """Get the exams extract as tabular dataset.
 
         Args:
             force_refresh: Refresh exams extract before processing it
+            omit_empty: Omit columns that are completely empty or contain only None values
         Returns:
             The resulting dataset
         """
@@ -101,6 +102,11 @@ class Bot(object):
             for attr_name in models.ExamData.__members__.keys():
                 row.append(getattr(exam, attr_name))
             dataset.append(row)
+        if omit_empty:
+            for column_header in dataset.headers:
+                column = dataset[column_header]
+                if not len(list(filter(lambda x: x is not None and len(x), column))):
+                    del dataset[column_header]
         return dataset
 
     def print_exams_extract(self, force_refresh=False) -> ():
@@ -109,4 +115,4 @@ class Bot(object):
         Args:
             force_refresh: Refresh exams extract before printing
         """
-        print(self.exams_extract_dataset(force_refresh=force_refresh))
+        print(self.exams_extract_dataset(force_refresh=force_refresh, omit_empty=True))
