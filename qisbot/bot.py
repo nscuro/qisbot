@@ -100,7 +100,8 @@ class Bot(object):
         for exam in exams_extract:
             row = []
             for attr_name in models.ExamData.__members__.keys():
-                row.append(getattr(exam, attr_name))
+                value = getattr(exam, attr_name) or ''
+                row.append(value)
             dataset.append(row)
         if omit_empty:
             for column_header in dataset.headers:
