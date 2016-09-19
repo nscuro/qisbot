@@ -77,11 +77,11 @@ def map_to_exam(source: typing.Union[html.HtmlElement, typing.Tuple[str]]) -> Ex
         exam = Exam()
         for name, member in ExamData.__members__.items():
             current_cell = row_cells[member.value]
-            if current_cell.text == '&nbsp':
+            if current_cell.text == '&nbsp' or not len(current_cell.text):
                 attribute_value = None
             else:
                 attribute_value = current_cell.text_content().strip()
-            setattr(exam, name, str(attribute_value))
+            setattr(exam, name, str(attribute_value) if attribute_value else None)
         return exam
 
     def map_from_sql(query_result: typing.Tuple[str]) -> Exam:
@@ -90,7 +90,8 @@ def map_to_exam(source: typing.Union[html.HtmlElement, typing.Tuple[str]]) -> Ex
                                                                                         len(ExamData.__members__)))
         exam = Exam()
         for name, member in ExamData.__members__.items():
-            setattr(exam, name, str(query_result[member.value]))
+            attribute_value = query_result[member.value]
+            setattr(exam, name, str(attribute_value) if attribute_value else None)
         return exam
 
     if isinstance(source, html.HtmlElement):
