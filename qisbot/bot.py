@@ -75,7 +75,8 @@ class Bot(object):
             if persisted_exam:
                 changes = models.compare_exams(old=persisted_exam, new=exam)
                 if len(changes):
-                    zope.event.notify(events.ExamChangedEvent(old_exam=persisted_exam, new_exam=exam, changes=changes))
+                    zope.event.notify(
+                        events.ExamChangedEvent(self.config, old_exam=persisted_exam, new_exam=exam, changes=changes))
                     # Persist the changes
                     update_changes = {}
                     for changed_field, values in changes.items():
@@ -84,7 +85,7 @@ class Bot(object):
                     self._db_manager.commit()
             else:
                 self._db_manager.persist_exam(exam)
-                zope.event.notify(events.NewExamEvent(exam))
+                zope.event.notify(events.NewExamEvent(self.config, exam))
 
     def exams_extract_dataset(self, force_refresh=False, omit_empty=False) -> tablib.Dataset:
         """Get the exams extract as tabular dataset.
