@@ -8,6 +8,7 @@ from qisbot import persistence
 from qisbot import qis
 from qisbot import scraper
 from qisbot import events
+from qisbot import notifies
 from qisbot import models
 
 
@@ -50,14 +51,16 @@ class Bot(object):
         """Register event subscribers based on the configuration given."""
         if self.config.notify_on_new:
             if self.config.notify_stdout:
-                zope.event.subscribers.append(events.on_new_exam_stdout)
+                zope.event.subscribers.append(notifies.on_new_exam_stdout)
             if self.config.notify_email:
+                # TODO
                 pass
         if self.config.notify_on_changed:
             if self.config.notify_stdout:
-                zope.event.subscribers.append(events.on_exam_changed_stdout)
+                zope.event.subscribers.append(notifies.on_exam_changed_stdout)
             if self.config.notify_email:
-                zope.event.subscribers.append(events.on_exam_changed_email)
+                # TODO
+                pass
 
     @ensure_login
     def refresh_exams_extract(self) -> ():
