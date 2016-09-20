@@ -42,3 +42,27 @@ class QisConfiguration(object):
     @property
     def notify_email(self) -> bool:
         return self.parser.getboolean('NOTIFICATIONS', 'email', fallback=False)
+
+    @property
+    def email_notify_host(self) -> str:
+        return self.parser.get('EMAIL NOTIFY', 'host')
+
+    @property
+    def email_notify_port(self) -> str:
+        return self.parser.get('EMAIL NOTIFY', 'port')
+
+    @property
+    def email_notify_ssl(self) -> bool:
+        return self.parser.getboolean('EMAIL NOTIFY', 'ssl')
+
+    @property
+    def email_notify_username(self) -> str:
+        return self.parser.get('EMAIL NOTIFY', 'username')
+
+    @property
+    def email_notify_password(self) -> str:
+        return self.parser.get('EMAIL NOTIFY', 'password')
+
+    @property
+    def email_notify_destination(self) -> str:
+        return self.parser.get('EMAIL NOTIFY', 'destination')

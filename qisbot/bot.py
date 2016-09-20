@@ -53,14 +53,12 @@ class Bot(object):
             if self.config.notify_stdout:
                 zope.event.subscribers.append(notifies.on_new_exam_stdout)
             if self.config.notify_email:
-                # TODO
-                pass
+                zope.event.subscribers.append(notifies.on_new_exam_email)
         if self.config.notify_on_changed:
             if self.config.notify_stdout:
                 zope.event.subscribers.append(notifies.on_exam_changed_stdout)
             if self.config.notify_email:
-                # TODO
-                pass
+                zope.event.subscribers.append(notifies.on_exam_changed_email)
 
     @ensure_login
     def refresh_exams_extract(self) -> ():
