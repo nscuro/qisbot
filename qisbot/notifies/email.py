@@ -1,12 +1,13 @@
+import zope.event.classhandler
+
 from qisbot import events
-from qisbot.notifies import subscriber_of
 
 
-@subscriber_of(events.NewExamEvent)
+@zope.event.classhandler.handler(events.NewExamEvent)
 def on_new_exam_email(event: events.NewExamEvent) -> ():
     pass
 
 
-@subscriber_of(events.ExamChangedEvent)
+@zope.event.classhandler.handler(events.ExamChangedEvent)
 def on_exam_changed_email(event: events.ExamChangedEvent) -> ():
     pass
