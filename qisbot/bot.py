@@ -106,7 +106,7 @@ class Bot(object):
         if omit_empty:
             for column_header in dataset.headers:
                 column = dataset[column_header]
-                if not len(list(filter(lambda x: x is not None and len(x), column))):
+                if not [column_val for column_val in column if column_val]:
                     del dataset[column_header]
         return dataset
 
