@@ -78,3 +78,22 @@ def on_exam_changed_email(event: events.ExamChangedEvent) -> ():
     message['From'] = event.config.email_notify_username
     with _email_connection(event.config) as conn:
         conn.sendmail(event.config.email_notify_username, event.config.email_notify_destination, message.as_string())
+
+
+def test_connection(conf: config.QisConfiguration, print_exception=False) -> bool:
+    """Test the given E-Mail configuration by performing a login with it.
+
+    Args:
+        conf: The configuration containing connection & login data
+        print_exception: Write the exception to stdout when one occurs
+    Returns:
+        False when the data is invalid, otherwise True
+    """
+    try:
+        with _email_connection(conf):
+            pass
+        return True
+    except Exception as ex:
+        if print_exception:
+            print(ex)
+        return False
