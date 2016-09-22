@@ -60,7 +60,7 @@ def on_new_exam_email(event: events.NewExamEvent) -> ():
         if attribute and attribute != 'None':
             message_content += '\t- {}: "{}"\n'.format(attr_name, attribute)
     message = email.mime.text.MIMEText(message_content, _subtype='plain')
-    message['Subject'] = 'qisbot: The results of your "{}" exam have been published!'
+    message['Subject'] = 'qisbot: The results of your "{}" exam have been published!'.format(event.exam.name)
     message['From'] = event.config.email_notify_username
     with _email_connection(event.config) as conn:
         conn.sendmail(event.config.email_notify_username, event.config.email_notify_destination, message.as_string())
