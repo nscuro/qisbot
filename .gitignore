@@ -95,3 +95,4 @@ ENV/
 # qisbot config & database
 qisbot.ini
 qisbot.db
+logging.ini
