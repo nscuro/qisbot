@@ -53,6 +53,8 @@ def _email_connection(conf: config.QisConfiguration) -> typing.Union[smtplib.SMT
 @zope.event.classhandler.handler(events.NewExamEvent)
 def on_new_exam_email(event: events.NewExamEvent) -> ():
     """Notify the user about a newly published exam result via E-Mail."""
+    if not event.config.notify_email:
+        return
     message_content = _new_exam_message.format(emotion=random.choice(_emotions), action=random.choice(_actions),
                                                exam=event.exam.name)
     for attr_name in models.ExamData.__members__.keys():
@@ -69,6 +71,8 @@ def on_new_exam_email(event: events.NewExamEvent) -> ():
 @zope.event.classhandler.handler(events.ExamChangedEvent)
 def on_exam_changed_email(event: events.ExamChangedEvent) -> ():
     """Notify the user about an updated exam result via E-Mail."""
+    if not event.config.notify_email:
+        return
     message_content = _updated_exam_message.format(emotion=random.choice(_emotions), action=random.choice(_actions),
                                                    exam=event.old_exam.name)
     for changed_attr, values in event.changes.items():

@@ -8,8 +8,8 @@ from qisbot import persistence
 from qisbot import qis
 from qisbot import scraper
 from qisbot import events
-from qisbot import notifies
 from qisbot import models
+from qisbot import notifies
 
 
 def ensure_login(func):
@@ -45,20 +45,6 @@ class Bot(object):
         self._db_manager = persistence.DatabaseManager(database_path)
         self._scraper = scraper.Scraper()
         self.qis = qis.Qis(base_url=self.config.base_url, custom_scraper=self._scraper)
-        self._register_event_subscribers()
-
-    def _register_event_subscribers(self):
-        """Register event subscribers based on the configuration given."""
-        if self.config.notify_on_new:
-            if self.config.notify_stdout:
-                zope.event.subscribers.append(notifies.on_new_exam_stdout)
-            if self.config.notify_email:
-                zope.event.subscribers.append(notifies.on_new_exam_email)
-        if self.config.notify_on_changed:
-            if self.config.notify_stdout:
-                zope.event.subscribers.append(notifies.on_exam_changed_stdout)
-            if self.config.notify_email:
-                zope.event.subscribers.append(notifies.on_exam_changed_email)
 
     @ensure_login
     def refresh_exams_extract(self) -> ():
