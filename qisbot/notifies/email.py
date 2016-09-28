@@ -9,6 +9,7 @@ import zope.event.classhandler
 from qisbot import models
 from qisbot import events
 from qisbot import config
+from qisbot.notifies import failsafe_notify
 
 _emotions = [
     'happy',
@@ -51,6 +52,7 @@ def _email_connection(conf: config.QisConfiguration) -> typing.Union[smtplib.SMT
 
 
 @zope.event.classhandler.handler(events.NewExamEvent)
+@failsafe_notify
 def on_new_exam_email(event: events.NewExamEvent) -> ():
     """Notify the user about a newly published exam result via E-Mail."""
     if not event.config.notify_email:
@@ -69,6 +71,7 @@ def on_new_exam_email(event: events.NewExamEvent) -> ():
 
 
 @zope.event.classhandler.handler(events.ExamChangedEvent)
+@failsafe_notify
 def on_exam_changed_email(event: events.ExamChangedEvent) -> ():
     """Notify the user about an updated exam result via E-Mail."""
     if not event.config.notify_email:

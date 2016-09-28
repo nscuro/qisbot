@@ -2,9 +2,11 @@ import zope.event.classhandler
 
 from qisbot import models
 from qisbot import events
+from qisbot.notifies import failsafe_notify
 
 
 @zope.event.classhandler.handler(events.NewExamEvent)
+@failsafe_notify
 def on_new_exam_stdout(event: events.NewExamEvent) -> ():
     """Subscriber to NewExamEvent that prints to stdout."""
     if not event.config.notify_stdout:
@@ -18,6 +20,7 @@ def on_new_exam_stdout(event: events.NewExamEvent) -> ():
 
 
 @zope.event.classhandler.handler(events.ExamChangedEvent)
+@failsafe_notify
 def on_exam_changed_stdout(event: events.ExamChangedEvent) -> ():
     """Subscriber of ExamChangedEvent that prints to stdout."""
     if not event.config.notify_stdout:
