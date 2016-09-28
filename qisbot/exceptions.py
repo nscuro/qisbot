@@ -26,4 +26,5 @@ class UnexpectedStateException(BaseException):
 
 
 class PersistenceException(IOError):
+    """Raised when a database related process or action failed."""
     pass
