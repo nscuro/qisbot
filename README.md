@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/scuroworks/qisbot.svg?branch=develop)](https://travis-ci.org/scuroworks/qisbot)
+![Project Status](https://img.shields.io/badge/development-discontinued-red.svg)
 
 # qisbot
 
@@ -19,11 +20,6 @@
  * `pip3 install -r requirements.txt`
  * You may want to use a [virtual environment](https://virtualenv.pypa.io/en/stable/) for this
 * You're all set! qisbot can now be startet with `python3 runqisbot.py`
-
-### The *other* way
-* I'm trying to provide standalone binaries for every release of qisbot
-* The binaries are created using [PyInstaller](http://www.pyinstaller.org/), see their website for further details
-* You can find them in the project's [releases section](https://github.com/scuroworks/qisbot/releases) when they're available
 
 ## Usage
 * Get an overview of qisbot's functionality: `python3 runqisbot.py -h`
