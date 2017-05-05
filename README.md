@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/scuroworks/qisbot.svg?branch=develop)](https://travis-ci.org/scuroworks/qisbot)
+[![Build Status](https://travis-ci.org/nscuro/qisbot.svg?branch=develop)](https://travis-ci.org/nscuro/qisbot)
 ![Project Status](https://img.shields.io/badge/development-discontinued-red.svg)
 
 # qisbot
