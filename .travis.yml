@@ -2,6 +2,6 @@ language: python
 python:
     - "3.4"
     - "3.5"
-    - "nightly"
+    - "3.6"
 install: "pip install -r requirements.txt"
-script: nosetests -w ./tests
+script: pytest
