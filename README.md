@@ -2,6 +2,7 @@
 ![Project Status](https://img.shields.io/badge/development-discontinued-red.svg)
 
 # qisbot
+![Screenshot](screenshot.png)
 
 ## Features
 * Fetching of exam results / grades from ~~your university's~~ FH Kiel's QIS server
