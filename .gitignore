@@ -92,7 +92,5 @@ ENV/
 *.iml
 .idea/
 
-# qisbot config & database
-qisbot.ini
+# qisbot database
 qisbot.db
-logging.ini

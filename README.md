@@ -4,15 +4,13 @@
 # qisbot
 
 ## Features
-* Fetching of exam results / grades from your university's QIS server
+* Fetching of exam results / grades from ~~your university's~~ FH Kiel's QIS server
 * Local storage of those results, always accessible
 * Notifications for new or updated exam results / grades
  * qisbot comes with support for notifications to stdout and e-mail
  * You can easily extend qisbot with your own notifications
 
 ## Installation
-
-### The Python way
 * Install Python **3**, any version *>= 3.4* will do
  * Installers and ZIP packages can be downloaded from [here](https://www.python.org/downloads/)
  * It is Pre-installed on many recent GNU/Linux distributions or can be installed using *apt*, *pacman*, *[homebrew](http://brew.sh/)* or similar package managers
